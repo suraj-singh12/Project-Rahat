@@ -201,7 +201,7 @@ if __name__ == '__main__':
     
     which_portal = input("Select a portal (Camp-Admin (c)/System-Admin (s)): ")
     if which_portal.lower() == 's':
-        pswd = input("Enter password to access System-Admin portal: ", end= '')
+        pswd = input("Enter password to access System-Admin portal: ")
         
         # password check method (dummy)
         if pswd == "IamSysAdmin99":
@@ -210,6 +210,7 @@ if __name__ == '__main__':
             print("2. Deregister an accidentally registered camp")
             print("3. Read the relations of a camp")
             print("4. Request detail modification of a camp's relation")
+            print("0. To exit")
             choice = int(input("Enter your choice: "))
             if choice == 1:
                 registerCamp()
@@ -219,10 +220,13 @@ if __name__ == '__main__':
                 readRelation()
             elif choice == 4:
                 requestDetailModification()
+            elif choice == 0:
+                print("Exiting ...")
+                exit(0)
             else:
                 print("Error!! wrong choice")
         else:
-            print("Wrong Password, Access Denied!")
+            print("\nWrong Password, Access Denied!")
             exit(0)
     
     elif which_portal.lower() == 'c':
@@ -240,7 +244,7 @@ if __name__ == '__main__':
             print("Error!! There's no camp with id " + campId)
             exit(-1)
         else:
-            pswd = input("Enter password of camp" + campId + " :", end= '')
+            pswd = input("Enter password of camp" + campId + ": ")
 
             # password check (dummy)
             if pswd == "IamCampAdmin88":
@@ -284,4 +288,7 @@ if __name__ == '__main__':
                 print("10. Send Feedback to SysAdmin (to NDRF authorities)")
                 # from general feedback to all types, including education of students, requirements, etc
                 print("11. Check donation status")
-        
+                print("0. To exit")
+                choice = input("Enter a choice: ")
+
+                print("Implementation In Progresss")
