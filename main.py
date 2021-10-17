@@ -24,7 +24,7 @@ def connect(database=''):
         params = config()
 
         # connect to the PostgreSQL server
-        print('\nConnecting to the PostgreSQL database...')
+        # print('\nConnecting to the PostgreSQL database...')   #-----------
         if database != '':      # if a database is specified during connection, then connect to that otherwise default
             params['database'] = database
         
@@ -33,7 +33,7 @@ def connect(database=''):
         conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
         # enabled isolation_level_autocommit ; now databases can be created without issue
 
-        print("Connected successfully.\n")
+        # print("Connected successfully.\n")    #-----------
         # create a cursor
         cur = conn.cursor()
         
@@ -112,15 +112,16 @@ def deRegister():
         cur.close()
         conn.close()
 
-        # connect to campName database
+        # connect to required camp database
         cur,conn = connect(campName)
         # find all existing relations/tables in database
         cur.execute("SELECT * FROM information_schema.tables WHERE table_schema = 'public'")
         
-        print("All these relations exist in " + campName + " :")
+        
         if cur.rowcount == 0:
-            print('None')
+            print("No relation found in " + campName)
         else:
+            print("All these relations exist in " + campName + " :")
             for table in cur.fetchall():
                 print(table[0], end=' ')
         print("\n[Note: This action is irreversible and you will lose all the data of this camp]")
@@ -139,7 +140,57 @@ def deRegister():
 
 def readRelation():
     """ Reads a database """
-    pass
+    inp = input("Enter the camp name: ")
+    # campName = "camp" + inp
+    campName = inp
+
+    # connect to default database
+    cur, conn = connect()
+    # list all databases
+    cur.execute("SELECT datname FROM pg_database;")
+    db_list = list()
+    for db in cur.fetchall():
+        db_list.append(db[0])
+    
+    if campName in db_list:
+        cur.close()
+        conn.close()
+        
+        # connect to required camp database
+        cur, conn = connect(campName)
+        # find all existing relations/tables in database
+        cur.execute("SELECT * FROM information_schema.tables WHERE table_schema = 'public'")
+        
+        if cur.rowcount == 0:
+            print("NO relation found in " + campName)
+        else:
+            print("\nRelations of " + campName + " :")
+            print("==> ", end ='')
+
+            all_relations = list()
+            # print all the relations in current database
+            for table in cur.fetchall():
+                # print(table)
+                print(table[2], end=', ')        #prints the table name only
+                all_relations.append(table[2])
+            print()
+
+            relation = input("Enter the relation name you want to access: ")
+            
+            # if the relation is present then print its data, else say not found
+            if relation in all_relations:
+                print("Data of " + relation + ": ")
+                cur.execute("select * from " + relation + ";")
+                for row in cur.fetchall():
+                    print(row)
+            else:
+                print("Error, " + relation + " not found! Please select an existing relation")
+        
+        cur.close()
+        conn.close()
+    else:
+        print("Error! " + campName + " is not a registered camp")
+
 
 def requestDetailModification():
     """ sends a request to the camp associated with the database, so admin's can approve/disapprove the request for modification """
