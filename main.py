@@ -1,6 +1,8 @@
 # RAHAT v1.0
 
 import psycopg2
+from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+# important to import and enable isolation_level_autocommot otherwise database creation fails
 
 # usrname = "postgres"
 # psswd = "toor"
@@ -24,17 +26,20 @@ def connect():
         # connect to the PostgreSQL server
         print('Connecting to the PostgreSQL database...')
         conn = psycopg2.connect(**params)
-		
+        conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+        # enabled isolation_level_autocommit ; now databases can be created without issue
+
+        print("Connected successfully.")
         # create a cursor
         cur = conn.cursor()
         
 	    # execute a statement
-        print('PostgreSQL database version:')
-        cur.execute('SELECT version();')
+        # print('PostgreSQL database version:')
+        # cur.execute('SELECT version();')
 
         # display the PostgreSQL database server version
-        db_version = cur.fetchone()
-        print(db_version)
+        # db_version = cur.fetchone()
+        # print(db_version)
         
         # printing tables of 'testingbase' database
         # print('\ntestingbase tables :')
@@ -60,7 +65,25 @@ def connect():
 
 def registerCamp():
     """ in technical terms: Creates a new database for a new camp """
-    pass
+    inp = input("Enter camp ID: ").lower()
+    campName = "camp" + inp
+    
+    # connect to database
+    cur = connect()
+    # list all databases
+    cur.execute("SELECT datname FROM pg_database;")
+    db_list = list()
+    for db in cur.fetchall():
+        db_list.append(db[0])
+    
+
+    # search in them if campName database exists or not, if not, then create
+    if campName not in db_list:
+        createDatabase = "CREATE DATABASE " + campName + ";"
+        cur.execute(createDatabase)
+        print("Camp " + campName + " successfully registered.")
+    else:
+        print("camp already exists!!")
 
 def readRelation():
     """ Reads a database """
@@ -71,7 +94,7 @@ def requestDetailModification():
     pass
 
 if __name__ == '__main__':
-    cur = connect()
+    # cur = connect()
     
     print("\n----------Welcome to Admin portal-----------")
     print("1. Register a camp")
