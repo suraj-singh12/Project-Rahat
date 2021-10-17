@@ -141,8 +141,8 @@ def deRegister():
 def readRelation():
     """ Reads a database """
     inp = input("Enter the camp name: ")
-    # campName = "camp" + inp
-    campName = inp
+    campName = "camp" + inp 
+    # campName = inp        # uncomment this to access testingBase database and comment out above line
 
     # connect to default database
     cur, conn = connect()
