@@ -199,20 +199,89 @@ def requestDetailModification():
 if __name__ == '__main__':
     # cur = connect()
     
-    print("\n----------Welcome to Admin portal-----------")
-    print("1. Register a camp")
-    print("2. Deregister an accidentally registered camp")
-    print("3. Read the relations of a camp")
-    print("4. Request detail modification of a camp's relation")
-    choice = int(input("Enter your choice: "))
-    if choice == 1:
-        registerCamp()
-    elif choice == 2:
-        deRegister()
-    elif choice == 3:
-        readRelation()
-    elif choice == 4:
-        requestDetailModification()
-    else:
-        print("Error!! wrong choice")
+    which_portal = input("Select a portal (Camp-Admin (c)/System-Admin (s)): ")
+    if which_portal.lower() == 's':
+        pswd = input("Enter password to access System-Admin portal: ", end= '')
+        
+        # password check method (dummy)
+        if pswd == "IamSysAdmin99":
+            print("\n----------Welcome to Admin portal-----------")
+            print("1. Register a camp")
+            print("2. Deregister an accidentally registered camp")
+            print("3. Read the relations of a camp")
+            print("4. Request detail modification of a camp's relation")
+            choice = int(input("Enter your choice: "))
+            if choice == 1:
+                registerCamp()
+            elif choice == 2:
+                deRegister()
+            elif choice == 3:
+                readRelation()
+            elif choice == 4:
+                requestDetailModification()
+            else:
+                print("Error!! wrong choice")
+        else:
+            print("Wrong Password, Access Denied!")
+            exit(0)
     
+    elif which_portal.lower() == 'c':
+        campId = input("Enter your camp ID: ")
+        cur,conn = connect()
+        cur.execute("SELECT datname from pg_database;")
+        db_list = list()
+        for db in cur.fetchall():
+            db_list.append(db[0])
+        
+        cur.close()
+        conn.close()
+
+        if ("camp" + campId) not in db_list:
+            print("Error!! There's no camp with id " + campId)
+            exit(-1)
+        else:
+            pswd = input("Enter password of camp" + campId + " :", end= '')
+
+            # password check (dummy)
+            if pswd == "IamCampAdmin88":
+                # NOTE: we will maintain whether a person is present in camp or left, 
+                # so that even if person leaves, we have his/her information
+                # new column char(1) Present? (y/n)
+
+                # one more column containing Flood codename will be present
+                # will be same for all people 
+                # but when database used in another flood later
+                # flood codename will be updated and will be same for all people coming then
+                # so on
+
+                # contains consolidated information of camp, location, id, authorities list
+                # maintainers etc (in a file or a new relation)
+
+                cur, conn = connect("camp"+campId)
+                print("\n----------Welcome to CampAdmin portal-----------") 
+                print("Connected to your camp camp" + campId + "\n")
+                print("1. Read Record(s)")
+                print("2. Enter a new Person's Record")
+                # This will first check if the camp is full or not => count(people) [technically count(tuples where Present='y')]
+                # if yes, call (5) or (6) and then (4) accordingly
+                # will also check if age > 60, should be taken to 60+ camps
+                # and < 60 should be kept in < 6o age camps
+                # according call (4)
+                # Also there would be date when this person entered in camp
+
+                print("3. Remove an existing Record")
+                # also a col containing LeftDate needs to be updated
+                print("4. Direct an Person to other camp (requires informing the other side)")
+                print("5. Find vacancies in nearby camps")
+                print("6. Find vacancies in all camps")
+                print("7. Request read access to supply data/resources of other camp")
+                print("8. Request an emergency item/resource supply from other camp(s)")
+
+                print("9.Read new entries of the day in other camps")
+                # also allows search in today's new entries of other camps
+                # contains UniteProgram inside, so can unite the people who are found to their families
+                
+                print("10. Send Feedback to SysAdmin (to NDRF authorities)")
+                # from general feedback to all types, including education of students, requirements, etc
+                print("11. Check donation status")
+        
