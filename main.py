@@ -202,30 +202,74 @@ def listAllCamps():
     """ Lists out the information of all camps registered """
     cur,conn = connect("all_camp_details")
     # year = input("Enter the year of which camps you want to access (yyyy): ")
-    detailsOf = "campdet" + "2021"
+    tableName = "campdet" + "2021"
     
     print("1. Print campNames only")
-    print("2. Print all details of each camp")
+    print("2. Print details of all camps")
+    print("3. Print full details of a specific camp")
     choice = int(input("Enter your choice: "))
     if choice == 1:
         print("All camps registered in 2021 are: ")
-        cur.execute("select * from " + detailsOf + ";")
+        cur.execute("select * from " + tableName + ";")
         for item in cur.fetchall():
             print(item[1],end = '\t')
         print()
 
     elif choice == 2:
         print("Details of all camps registered in year 2021: ")
-        header = ["campId","campName","state","district","city_or_village","coordinates","Admin","Total Capacity","Capacity Full?"]
+        header = ["campId","campName","state","district","city_or_village","coordinates","Admin","Admin_Aadhar","Total Capacity","Capacity Full?"]
         for item in header:
             print(item,end='\t')
         print()
         
-        cur.execute("select * from " + detailsOf + ";")
+        cur.execute("select * from " + tableName + ";")
         for row in cur.fetchall():
             for item in row:
                 print(item,end='\t')
             print()
+    
+    elif choice == 3:
+        print("All camps registered in year 2021 are: ")
+        cur.execute("select * from " + tableName + ";")
+        camps = []
+        for item in cur.fetchall():
+            camps.append(item[1])
+            print(item[1],end=', ')
+        print()
+
+        myCamp = input("Enter the camp Name: ")
+        if myCamp not in camps:
+            print("Error, no such camp exists !")
+            return
+        else:
+            """ print the details of the camp with details of support members too """
+            
+            print()
+            header = ["campId","campName","state","district","city_or_village","coordinates","Admin","Admin_Aadhar","Total Capacity","Capacity Full?"]
+            for item in header:
+                print(item,end='\t')
+            print()
+
+            idd = myCamp[4:]
+            # find details of current camp
+            cur.execute("select * from " + tableName + " where campId = '" + idd + "' ;")
+            # print details of this camp
+            for row in cur.fetchall():
+                for item in row:
+                    print(item,end='\t')
+                print()
+
+            print()
+            # print details of support members
+            header = ["Member Name", "Member Aadhar"]
+            print(header[0], '\t', header[1])
+            
+            cur.execute("select * from support_members2021 where campId = '" + idd + "';")
+            for row in cur.fetchall():
+                for item in row[1:]:
+                    print(item,end='\t')
+                print()
+
     cur.close()
     conn.close()
 
