@@ -13,7 +13,6 @@ from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 #     user=usrname,
 #     password=psswd)
 
-import psycopg2
 from config import config
 
 def connect(database=''):
@@ -66,6 +65,9 @@ def connect(database=''):
     #     if conn is not None:
     #         conn.close()
     #         print('Database connection closed.')
+
+
+''' -------- System Admin portal functions -------- '''
 
 def registerCamp():
     """ in technical terms: Creates a new database for a new camp """
@@ -192,45 +194,117 @@ def readRelation():
         print("Error! " + campName + " is not a registered camp")
 
 
-def requestDetailModification():
-    """ sends a request to the camp associated with the database, so admin's can approve/disapprove the request for modification """
+# def requestDetailModification():
+#     """ sends a request to the camp associated with the database, so admin's can approve/disapprove the request for modification """
+#     pass
+
+def listAllCamps():
+    """ Lists out the information of all camps registered """
+    cur,conn = connect("all_camp_details")
+    # year = input("Enter the year of which camps you want to access (yyyy): ")
+    detailsOf = "campdet" + "2021"
+    
+    print("1. Print campNames only")
+    print("2. Print all details of each camp")
+    choice = int(input("Enter your choice: "))
+    if choice == 1:
+        print("All camps registered in 2021 are: ")
+        cur.execute("select * from " + detailsOf + ";")
+        for item in cur.fetchall():
+            print(item[1],end = '\t')
+        print()
+
+    elif choice == 2:
+        print("Details of all camps registered in year 2021: ")
+        header = ["campId","campName","state","district","city_or_village","coordinates","Admin","Total Capacity","Capacity Full?"]
+        for item in header:
+            print(item,end='\t')
+        print()
+        
+        cur.execute("select * from " + detailsOf + ";")
+        for row in cur.fetchall():
+            for item in row:
+                print(item,end='\t')
+            print()
+    cur.close()
+    conn.close()
+
+''' -------- CampAdmin portal functions -------- '''
+def readThis(campName):
+    pass
+    # Establish connection to database of the camp
+    # cur,conn = connect(campName)
+
+    # Will be implemented after write is implemented
+    # because in order to read, we need the structure of write
+
+def writeInto(campName):
     pass
 
+def removeFrom(campName):
+    pass
+
+def directFrom(campName):
+    pass
+
+def findVacancies():
+    pass
+
+def requestReadSupply():
+    pass
+
+def requestGetSupply():
+    pass
+
+def readTodayAll():
+    pass
+
+def feedback():
+    pass
+
+def checkDonationStatus():
+    pass
+
+
+''' -------- Driver function -------- '''
 if __name__ == '__main__':
     # cur = connect()
     
     which_portal = input("Select a portal (Camp-Admin (c)/System-Admin (s)): ")
     if which_portal.lower() == 's':
         pswd = input("Enter password to access System-Admin portal: ")
-        
         # password check method (dummy)
         if pswd == "IamSysAdmin99":
-            print("\n----------Welcome to Admin portal-----------")
-            print("1. Register a camp")
-            print("2. Deregister an accidentally registered camp")
-            print("3. Read the relations of a camp")
-            print("4. Request detail modification of a camp's relation")
-            print("0. To exit")
-            choice = int(input("Enter your choice: "))
-            if choice == 1:
-                registerCamp()
-            elif choice == 2:
-                deRegister()
-            elif choice == 3:
-                readRelation()
-            elif choice == 4:
-                requestDetailModification()
-            elif choice == 0:
-                print("Exiting ...")
-                exit(0)
-            else:
-                print("Error!! wrong choice")
+            choice = -1
+            while choice != 0:
+                print("\n----------Welcome to Admin portal-----------")
+                print("1. Register a camp")
+                print("2. Deregister an accidentally registered camp")
+                print("3. Read the relations of a camp")
+                print("4. List all camps and their details")
+                # print("4. Request detail modification of a camp's relation")
+                print("0. Exit")
+                choice = int(input("Enter your choice: "))
+                if choice == 1:
+                    registerCamp()
+                elif choice == 2:
+                    deRegister()
+                elif choice == 3:
+                    readRelation()
+                elif choice == 4:
+                    listAllCamps()
+                elif choice == 0:
+                    print("Exiting ...")
+                    exit(0)
+                else:
+                    print("Error!! wrong choice")
         else:
             print("\nWrong Password, Access Denied!")
             exit(0)
     
     elif which_portal.lower() == 'c':
         campId = input("Enter your camp ID: ")
+        campName = "camp"  + campId
         cur,conn = connect()
         cur.execute("SELECT datname from pg_database;")
         db_list = list()
@@ -240,7 +314,7 @@ if __name__ == '__main__':
         cur.close()
         conn.close()
 
-        if ("camp" + campId) not in db_list:
+        if (campName) not in db_list:
             print("Error!! There's no camp with id " + campId)
             exit(-1)
         else:
@@ -261,34 +335,64 @@ if __name__ == '__main__':
                 # contains consolidated information of camp, location, id, authorities list
                 # maintainers etc (in a file or a new relation)
 
-                cur, conn = connect("camp"+campId)
-                print("\n----------Welcome to CampAdmin portal-----------") 
-                print("Connected to your camp camp" + campId + "\n")
-                print("1. Read Record(s)")
-                print("2. Enter a new Person's Record")
-                # This will first check if the camp is full or not => count(people) [technically count(tuples where Present='y')]
-                # if yes, call (5) or (6) and then (4) accordingly
-                # will also check if age > 60, should be taken to 60+ camps
-                # and < 60 should be kept in < 6o age camps
-                # according call (4)
-                # Also there would be date when this person entered in camp
+                choice = -1
+                while choice != 0:
+                    # cur, conn = connect("camp"+campId)    # no need to connect here
+                    print("\n----------Welcome to CampAdmin portal-----------") 
+                    print("Connected to your camp camp" + campId + "\n")
+                    print("1. Read Record(s)")
+                    print("2. Enter a new Person's Record")
+                    # This will first check if the camp is full or not => count(people) [technically count(tuples where Present='y')]
+                    # if yes, call (5) or (6) and then (4) accordingly
+                    # will also check if age > 60, should be taken to 60+ camps
+                    # and < 60 should be kept in < 6o age camps
+                    # according call (4)
+                    # Also there would be date when this person entered in camp
 
-                print("3. Remove an existing Record")
-                # also a col containing LeftDate needs to be updated
-                print("4. Direct an Person to other camp (requires informing the other side)")
-                print("5. Find vacancies in nearby camps")
-                print("6. Find vacancies in all camps")
-                print("7. Request read access to supply data/resources of other camp")
-                print("8. Request an emergency item/resource supply from other camp(s)")
+                    print("3. Remove an existing Record")
+                    # also a col containing LeftDate needs to be updated
+                    print("4. Direct an Person to other camp (requires informing the other side)")
+                    print("5. Find vacancies in nearby camps")
+                    # print("6. Find vacancies in all camps")
+                    print("6. Request read access to supply data/resources of other camp")
+                    print("7. Request an emergency item/resource supply from other camp(s)")
 
-                print("9.Read new entries of the day in other camps")
-                # also allows search in today's new entries of other camps
-                # contains UniteProgram inside, so can unite the people who are found to their families
+                    print("8. Read new entries of the day in other camps")
+                    # also allows search in today's new entries of other camps
+                    # contains UniteProgram inside, so can unite the people who are found to their families
+                    
+                    print("9. Send Feedback to SysAdmin (to NDRF authorities)")
+                    # from general feedback to all types, including education of students, requirements, etc
+                    print("10. Check donation status")
+                    print("0. Exit")
+                    choice = input("Enter a choice: ")
+
+                    if choice == 1:
+                        readThis(campName)
+                    elif choice == 2:
+                        writeInto(campName)
+                    elif choice == 3:
+                        removeFrom(campName)
+                    elif choice == 4:
+                        directFrom(campName)
+                    elif choice == 5:
+                        findVacancies()
+                    elif choice == 6:
+                        requestReadSupply()
+                    elif choice == 7:
+                        requestGetSupply()
+                    elif choice == 8:
+                        readTodayAll()
+                    elif choice == 9:
+                        feedback()  # will have section-wise feedback
+                    elif choice == 10:
+                        checkDonationStatus()
+                    elif choice == 0:
+                        print("Exiting...")
+                        exit(0)
+                    else:
+                        print("Error! Invalid choice.")
+                        choice = 0
+                        print("Exiting...")
                 
-                print("10. Send Feedback to SysAdmin (to NDRF authorities)")
-                # from general feedback to all types, including education of students, requirements, etc
-                print("11. Check donation status")
-                print("0. To exit")
-                choice = input("Enter a choice: ")
-
-                print("Implementation In Progresss")
+                                    
