@@ -66,79 +66,87 @@ def connect(database=''):
     #         conn.close()
     #         print('Database connection closed.')
 
-
-''' -------- System Admin portal functions -------- '''
-
-def registerCamp():
-    """ in technical terms: Creates a new database for a new camp """
-    inp = input("Enter camp ID: ").lower()
-    campName = "camp" + inp
-    
-    # connect to database
-    cur,conn = connect()
+def listAllCamps(cur):
     # list all databases
     cur.execute("SELECT datname FROM pg_database;")
     db_list = list()
     for db in cur.fetchall():
         db_list.append(db[0])
+    return db_list
+
+def isPresentCamp(database):
+    # connect to default database
+    cur, conn = connect()
+    # list all databases present in system (i.e. all registered camps)
+    db_list = listAllCamps(cur)
+    # close cursor and connection with default database
+    cur.close()
+    conn.close()
+
+    # check the presence of database in all databases
+    if database in db_list:
+        return True
+    return False
+
+''' -------- System Admin portal functions -------- '''
+
+def registerCamp():
+    """ in technical terms: Creates a new database for a new camp """
     
-    # search in them if campName database exists or not, if not, then create
-    if campName not in db_list:
+    inp = input("Enter camp ID: ").lower()
+    campName = "camp" + inp
+    
+    if isPresentCamp(campName):
+        # create database campName
         createDatabase = "CREATE DATABASE " + campName + ";"
         cur.execute(createDatabase)
         print("Camp " + campName + " successfully registered.")
     else:
         print("Camp " + campName + " already exists!!")
     
-    # dispose the cursor
-    cur.close()
-    # close the connection
-    conn.close()
 
 
 def deRegister():
     """ in technical terms: drop a database"""
+    
     inp = input("Enter camp ID: ").lower()
     campName = "camp" + inp
-    
-    # connect to default database
-    cur,conn = connect()
-    # list all databases
-    cur.execute("SELECT datname FROM pg_database;")
-    db_list = list()
-    for db in cur.fetchall():
-        db_list.append(db[0])
-    
-    if campName in db_list:
+
+    if isPresentCamp(campName):
         # https://stackoverflow.com/questions/13719674/change-database-postgresql-in-python-using-psycopg2-dynamically
-        cur.close()
-        conn.close()
 
         # connect to required camp database
         cur,conn = connect(campName)
         # find all existing relations/tables in database
         cur.execute("SELECT * FROM information_schema.tables WHERE table_schema = 'public'")
-        
-        
+            
         if cur.rowcount == 0:
             print("No relation found in " + campName)
+            return
         else:
             print("All these relations exist in " + campName + " :")
             for table in cur.fetchall():
                 print(table[0], end=' ')
-        print("\n[Note: This action is irreversible and you will lose all the data of this camp]")
-        consent = input("Are you sure you want to de-register this camp?(y/n): ")
+            
+            print("\n[Note: This action is irreversible and you will lose all the data of this camp]")
+            consent = input("Are you sure you want to de-register this camp?(y/n): ")
 
-        if consent.lower() == 'y':
+            if consent.lower() == 'y':
+                # close connection with current database
+                cur.close()
+                conn.close()
+                # connect to default database
+                cur,conn = connect()
+                # drop the desired database
+                cur.execute("DROP DATABASE " + campName + ";")
+                print("Successfully de-registered " + campName)
+            else:
+                print("Operation Aborted!")
+            
+            # close connection with whatever database is connected
             cur.close()
             conn.close()
-            cur,conn = connect()
-            cur.execute("DROP DATABASE " + campName + ";")
-            print("Successfully de-registered " + campName)
-        else:
-            print("Operation Aborted!")
-        cur.close()
-        conn.close()
+
 
 def readRelation():
     """ Reads a database """
@@ -146,18 +154,7 @@ def readRelation():
     campName = "camp" + inp 
     # campName = inp        # uncomment this to access testingBase database and comment out above line
 
-    # connect to default database
-    cur, conn = connect()
-    # list all databases
-    cur.execute("SELECT datname FROM pg_database;")
-    db_list = list()
-    for db in cur.fetchall():
-        db_list.append(db[0])
-    
-    if campName in db_list:
-        cur.close()
-        conn.close()
-        
+    if isPresentCamp(campName):
         # connect to required camp database
         cur, conn = connect(campName)
         # find all existing relations/tables in database
@@ -193,10 +190,6 @@ def readRelation():
     else:
         print("Error! " + campName + " is not a registered camp")
 
-
-# def requestDetailModification():
-#     """ sends a request to the camp associated with the database, so admin's can approve/disapprove the request for modification """
-#     pass
 
 def listAllCamps():
     """ Lists out the information of all camps registered """
@@ -260,6 +253,7 @@ def listAllCamps():
                 print()
 
             print()
+
             # print details of support members
             header = ["Member Name", "Member Aadhar"]
             print(header[0], '\t', header[1])
@@ -269,18 +263,37 @@ def listAllCamps():
                 for item in row[1:]:
                     print(item,end='\t')
                 print()
-
+            print()
+    else:
+        print("Invalid Choice !")
+    
     cur.close()
     conn.close()
 
 ''' -------- CampAdmin portal functions -------- '''
 def readThis(campName):
-    pass
-    # Establish connection to database of the camp
-    # cur,conn = connect(campName)
+    in_pass = input("Enter your password again: ")
+    # read passwords file [dummy now]
+    params = config("passwords.ini","camps")
+    ac_pass = params.get(campName)
 
-    # Will be implemented after write is implemented
-    # because in order to read, we need the structure of write
+    # password is not null and matches then proceed to connect 
+    if ac_pass is not None and ac_pass == in_pass:
+        # connect to camp's database
+        cur,conn = connect(campName)
+
+        relationName = "main_table" #supposing main_table exists
+        cur.execute("SELECT * from " + relationName + ";")
+        if cur.rowcount == 0:
+            print("No records found!")
+        else:
+            for row in cur.fetchall():
+                print(row)
+        cur.close()
+        conn.close()
+    else:
+        print("Access denied, invalid password !")
+
 
 def writeInto(campName):
     pass
@@ -409,7 +422,7 @@ if __name__ == '__main__':
                     # from general feedback to all types, including education of students, requirements, etc
                     print("10. Check donation status")
                     print("0. Exit")
-                    choice = input("Enter a choice: ")
+                    choice = int(input("Enter a choice: "))
 
                     if choice == 1:
                         readThis(campName)
@@ -439,4 +452,6 @@ if __name__ == '__main__':
                         choice = 0
                         print("Exiting...")
                 
-                                    
+            else:
+                print("Wrong Password, Access Denied !")
+            
