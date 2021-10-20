@@ -4,6 +4,15 @@ from Database import Database
 
 class CampAdmin(Database):
     ''' -------- CampAdmin portal functions -------- '''
+
+    usrType = "camp_admin"
+
+    def __init__(self, identity, pswd):
+        self.identity = identity
+        if not self.validate(CampAdmin.usrType, self.identity, pswd):
+            print("Authentication Failed !")
+            exit(-1)
+    
     def readThis(self, campName):
         in_pass = input("Enter your password again: ")
 

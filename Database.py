@@ -4,6 +4,18 @@ import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
 class Database:
+    def validate(self, usrType, identity, pswd):
+        ''' used to validate password;    usrType: sys_admin/camp_admin, identity: campName/"sysadmin"  pswd: password '''
+        
+        # read passwords file (this file is on server)
+        params = config("passwords.ini",usrType)
+        # fetch password of given identity
+        ac_pass = params.get(identity)
+
+        if ac_pass is not None and  pswd == ac_pass:
+            return True
+        return False
+
     def connect(self, database=''):
         """ Connect to the PostgreSQL database server """
         conn = None

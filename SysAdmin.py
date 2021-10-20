@@ -2,6 +2,16 @@ from Database import Database
 
 class SysAdmin(Database):
     ''' -------- System Admin portal functions -------- '''
+    
+    usrType = "sys_admin"
+    identity = "sysadmin"
+
+    def __init__(self, pswd):
+        if not self.validate(SysAdmin.usrType, SysAdmin.identity, pswd):
+            print("Authentication Failed !")
+            exit(-1)
+
+
     def registerCamp(self):
         """ in technical terms: Creates a new database for a new camp """
         
@@ -121,11 +131,13 @@ class SysAdmin(Database):
             year = input("Enter the year of which camps you want to access (yyyy):")
         tableName = "campdet" + year
         
+        print()
         # selection menu
         print("1. Print campNames only")
         print("2. Print details of all camps")
         print("3. Print full details of a specific camp")
         choice = int(input("Enter your choice: "))
+        print()
 
         if choice == 1:
             print("All camps registered in 2021 are: ")
