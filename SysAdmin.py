@@ -10,6 +10,34 @@ class SysAdmin(Database):
         if not self.validate(SysAdmin.usrType, SysAdmin.identity, pswd):
             print("Authentication Failed !")
             exit(-1)
+    # private method
+    def __setCampDetails(self, campName):
+        print("Enter the below information correctly: ")
+        campId = campName[4:]
+        # campName we already have
+        
+        print("=> Enter Location Details: ")
+        state = input("State: ")
+        # check method will be installed later
+        district = input("District: ")
+        cityOrVillage = input("city/village name: ")
+        coord = input("Coordinates: ")
+        
+        print("=> Enter Camp Admin Details: ")
+        campAdminName = input("Name: ")
+        campAdminAadhar = input("Aadhar: ")
+
+        print("=> Camp Related")
+        totalCampCapacity = input("Total capacity of camp (in numbers): ")
+        capacityFull = 'N'
+
+        cur, conn = self.connect("all_camp_details")
+        tableName = "campdet2021"
+        query= "INSERT INTO " + tableName + " values ('" + campId + "', '" + campName + "', '" + state + "', '" + district + "', '" + cityOrVillage + "', '" + coord + "', '" + campAdminName + "', '" + campAdminAadhar+ "', " + totalCampCapacity + ", '" + capacityFull + "');"
+        cur.execute(query)
+        print("Total rows affected = {}".format(cur.rowcount))
+        cur.close()
+        conn.close()
 
 
     def registerCamp(self):
@@ -18,7 +46,9 @@ class SysAdmin(Database):
         inp = input("Enter camp ID: ").lower()
         campName = "camp" + inp
         
-        if self.isPresentCamp(campName):
+        if not self.isPresentCamp(campName):
+            self.__setCampDetails(campName)
+            
             # connect to default database
             cur,conn = self.connect()
 
