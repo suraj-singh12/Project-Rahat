@@ -1,295 +1,10 @@
 # RAHAT v1.0
 
-import psycopg2
-from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+
 # important to import and enable isolation_level_autocommot otherwise database creation fails
-
 from config import config
-
-def connect(database=''):
-    """ Connect to the PostgreSQL database server """
-    conn = None
-    try:
-        # read connection parameters
-        params = config()
-
-        # connect to the PostgreSQL server
-        # if a database is specified during connection, then connect to that otherwise default
-        if database != '':      
-            params['database'] = database
-        conn = psycopg2.connect(**params)
-
-        conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
-        # enabled isolation_level_autocommit ; now databases can be created without issue
-        # print("Connected successfully.\n")
-
-        # create a cursor
-        cur = conn.cursor()
-        return cur,conn
-
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-
-
-def listAllDatabases(cur):
-    # list all databases
-    cur.execute("SELECT datname FROM pg_database;")
-    db_list = list()
-    for db in cur.fetchall():
-        db_list.append(db[0])
-    return db_list
-
-def isPresentCamp(database):
-    # connect to default database
-    cur, conn = connect()
-    # list all databases present in system (i.e. all registered camps)
-    db_list = listAllDatabases(cur)
-    # close cursor and connection with default database
-    cur.close()
-    conn.close()
-
-    # check the presence of database in all databases
-    if database in db_list:
-        return True
-    return False
-
-
-''' -------- System Admin portal functions -------- '''
-def registerCamp():
-    """ in technical terms: Creates a new database for a new camp """
-    
-    inp = input("Enter camp ID: ").lower()
-    campName = "camp" + inp
-    
-    if isPresentCamp(campName):
-        # create database campName
-        createDatabase = "CREATE DATABASE " + campName + ";"
-        cur.execute(createDatabase)
-        print("Camp " + campName + " successfully registered.")
-    else:
-        print("Camp " + campName + " already exists!!")
-    
-
-def deRegister():
-    """ in technical terms: drop a database"""
-    
-    inp = input("Enter camp ID: ").lower()
-    campName = "camp" + inp
-
-    if isPresentCamp(campName):
-        # https://stackoverflow.com/questions/13719674/change-database-postgresql-in-python-using-psycopg2-dynamically
-
-        # connect to required camp database
-        cur,conn = connect(campName)
-        # find all existing relations/tables in database
-        cur.execute("SELECT * FROM information_schema.tables WHERE table_schema = 'public'")
-            
-        if cur.rowcount == 0:
-            print("No relation found in " + campName)
-            return
-        else:
-            print("All these relations exist in " + campName + " :")
-            for table in cur.fetchall():
-                print(table[0], end=' ')
-            
-            print("\n[Note: This action is irreversible and you will lose all the data of this camp]")
-            consent = input("Are you sure you want to de-register this camp?(y/n): ")
-
-            if consent.lower() == 'y':
-                # close connection with current database
-                cur.close()
-                conn.close()
-                # connect to default database
-                cur,conn = connect()
-                # drop the desired database
-                cur.execute("DROP DATABASE " + campName + ";")
-                print("Successfully de-registered " + campName)
-            else:
-                print("Operation Aborted!")            
-            # close connection with whatever database is connected
-            cur.close()
-            conn.close()
-
-
-def readRelation():
-    """ Reads a database """
-    inp = input("Enter the camp name: ")
-    campName = "camp" + inp 
-    # campName = inp        # uncomment this to access testingBase database and comment out above line
-
-    if isPresentCamp(campName):
-        # connect to required camp database
-        cur, conn = connect(campName)
-        # find all existing relations/tables in database
-        cur.execute("SELECT * FROM information_schema.tables WHERE table_schema = 'public'")
-        
-        if cur.rowcount == 0:
-            print("NO relation found in " + campName)
-        else:
-            print("\nRelations of " + campName + " :")
-            print("==> ", end ='')
-
-            all_relations = list()
-            # print all the relations in current database
-            for table in cur.fetchall():
-                # print(table)
-                print(table[2], end=', ')        #prints the table name only
-                all_relations.append(table[2])
-            print()
-
-            relation = input("Enter the relation name you want to access: ")
-            
-            # if the relation is present then print its data, else say not found
-            if relation in all_relations:
-                print("Data of " + relation + ": ")
-                cur.execute("select * from " + relation + ";")
-                for row in cur.fetchall():
-                    print(row)
-            else:
-                print("Error, " + relation + " not found! Please select an existing relation")
-        
-        cur.close()
-        conn.close()
-    else:
-        print("Error! " + campName + " is not a registered camp")
-
-
-def listAllDatabases():
-    """ Lists out the information of all camps registered """
-    cur,conn = connect("all_camp_details")
-    year = input("Enter the year of which camps you want to access (yyyy): ")
-    while (len(year) != 4) or (year.isnumeric() == False) or (year[0:3] != "202"):
-        print("Try again.. It is not a valid year.")
-        year = input("Enter the year of which camps you want to access (yyyy):")
-    tableName = "campdet" + year
-    
-    print("1. Print campNames only")
-    print("2. Print details of all camps")
-    print("3. Print full details of a specific camp")
-    choice = int(input("Enter your choice: "))
-
-    if choice == 1:
-        print("All camps registered in 2021 are: ")
-        cur.execute("select * from " + tableName + ";")
-        for item in cur.fetchall():
-            print(item[1],end = '\t')
-        print()
-
-    elif choice == 2:
-        print("Details of all camps registered in year 2021: ")
-        header = ["campId","campName","state","district","city_or_village","coordinates","Admin","Admin_Aadhar","Total Capacity","Capacity Full?"]
-        for item in header:
-            print(item,end='\t')
-        print()
-        
-        cur.execute("select * from " + tableName + ";")
-        for row in cur.fetchall():
-            for item in row:
-                print(item,end='\t')
-            print()
-    
-    elif choice == 3:
-        print("All camps registered in year 2021 are: ")
-        cur.execute("select * from " + tableName + ";")
-        camps = []
-        for item in cur.fetchall():
-            camps.append(item[1])
-            print(item[1],end=', ')
-        print()
-
-        myCamp = input("Enter the camp Name: ")
-        if myCamp not in camps:
-            print("Error, no such camp exists !")
-            return
-        else:
-            """ print the details of the camp with details of support members too """
-            
-            print()
-            header = ["campId","campName","state","district","city_or_village","coordinates","Admin","Admin_Aadhar","Total Capacity","Capacity Full?"]
-            for item in header:
-                print(item,end='\t')
-            print()
-
-            idd = myCamp[4:]
-            # find details of current camp
-            cur.execute("select * from " + tableName + " where campId = '" + idd + "' ;")
-            # print details of this camp
-            for row in cur.fetchall():
-                for item in row:
-                    print(item,end='\t')
-                print()
-
-            print()
-
-            # print details of support members
-            header = ["Member Name", "Member Aadhar"]
-            print(header[0], '\t', header[1])
-            
-            cur.execute("select * from support_members2021 where campId = '" + idd + "';")
-            for row in cur.fetchall():
-                for item in row[1:]:
-                    print(item,end='\t')
-                print()
-            print()
-    else:
-        print("Invalid Choice !")
-    
-    cur.close()
-    conn.close()
-
-
-''' -------- CampAdmin portal functions -------- '''
-def readThis(campName):
-    in_pass = input("Enter your password again: ")
-
-    # read passwords file (this file is on server)
-    params = config("passwords.ini","camps")
-    ac_pass = params.get(campName)
-
-    # password is not null and matches then proceed to connect 
-    if ac_pass is not None and ac_pass == in_pass:
-        # connect to camp's database
-        cur,conn = connect(campName)
-
-        relationName = "main_table" #supposing main_table exists
-        cur.execute("SELECT * from " + relationName + ";")
-        if cur.rowcount == 0:
-            print("No records found!")
-        else:
-            for row in cur.fetchall():
-                print(row)
-        cur.close()
-        conn.close()
-    else:
-        print("Access denied, invalid password !")
-
-
-def writeInto(campName):
-    pass
-
-def removeFrom(campName):
-    pass
-
-def directFrom(campName):
-    pass
-
-def findVacancies():
-    pass
-
-def requestReadSupply():
-    pass
-
-def requestGetSupply():
-    pass
-
-def readTodayAll():
-    pass
-
-def feedback():
-    pass
-
-def checkDonationStatus():
-    pass
+from SysAdmin import SysAdmin
+from CampAdmin import CampAdmin
 
 ''' -------- Driver function -------- '''
 def main():
@@ -297,12 +12,15 @@ def main():
     which_portal = input("Select a portal (Camp-Admin (c)/System-Admin (s)): ")
     
     if which_portal.lower() == 's':
+        admin = SysAdmin()
         pswd = input("Enter password to access System-Admin portal: ")
-        # password check method
-        # read passwords file (this file is on server)
-        params = config("passwords.ini","Admin")
-        ac_pass = params.get("SysAdmin")
         
+        # read passwords file (this file is on server)
+        params = config("passwords.ini","admin")
+        # print(params)
+        ac_pass = params.get("sysadmin")
+        # print(ac_pass)
+
         if ac_pass is not None and  pswd == ac_pass:
             choice = -1
             while choice != 0:
@@ -314,13 +32,13 @@ def main():
                 print("0. Exit")
                 choice = int(input("Enter your choice: "))
                 if choice == 1:
-                    registerCamp()
+                    admin.registerCamp()
                 elif choice == 2:
-                    deRegister()
+                    admin.deRegister()
                 elif choice == 3:
-                    readRelation()
+                    admin.readCamp()
                 elif choice == 4:
-                    listAllDatabases()
+                    admin.listAllRegCampsInfo()
                 elif choice == 0:
                     print("Exiting ...")
                     exit(0)
@@ -331,17 +49,22 @@ def main():
             exit(0)
     
     elif which_portal.lower() == 'c':
+        admin = CampAdmin()
         campId = input("Enter your camp ID: ")
         campName = "camp"  + campId
 
-        if not isPresentCamp(campName):
+        if not admin.isPresentCamp(campName):
             print("Error!! There's no camp with id " + campId)
             exit(-1)
         else:
             pswd = input("Enter password of camp" + campId + ": ")
 
-            # password check (dummy)
-            if pswd == "IamCampAdmin88":
+           # read passwords file (this file is on server)
+            params = config("passwords.ini","camps")
+            ac_pass = params.get(campName)
+        
+
+            if ac_pass is not None and  pswd == ac_pass:
                 # NOTE: we will maintain whether a person is present in camp or left, 
                 # so that even if person leaves, we have his/her information
                 # new column char(1) Present? (y/n)
@@ -388,25 +111,25 @@ def main():
                     choice = int(input("Enter a choice: "))
 
                     if choice == 1:
-                        readThis(campName)
+                        admin.readThis(campName)
                     elif choice == 2:
-                        writeInto(campName)
+                        admin.writeInto(campName)
                     elif choice == 3:
-                        removeFrom(campName)
+                        admin.removeFrom(campName)
                     elif choice == 4:
-                        directFrom(campName)
+                        admin.directFrom(campName)
                     elif choice == 5:
-                        findVacancies()
+                        admin.findVacancies()
                     elif choice == 6:
-                        requestReadSupply()
+                        admin.requestReadSupply()
                     elif choice == 7:
-                        requestGetSupply()
+                        admin.requestGetSupply()
                     elif choice == 8:
-                        readTodayAll()
+                        admin.readTodayAll()
                     elif choice == 9:
-                        feedback()  # will have section-wise feedback
+                        admin.feedback()  # will have section-wise feedback
                     elif choice == 10:
-                        checkDonationStatus()
+                        admin.checkDonationStatus()
                     elif choice == 0:
                         print("Exiting...")
                         exit(0)
