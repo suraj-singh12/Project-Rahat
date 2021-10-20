@@ -33,12 +33,22 @@ class SysAdmin(Database):
 
         cur, conn = self.connect("all_camp_details")
         tableName = "campdet2021"
+
         query= "INSERT INTO " + tableName + " values ('" + campId + "', '" + campName + "', '" + state + "', '" + district + "', '" + cityOrVillage + "', '" + coord + "', '" + campAdminName + "', '" + campAdminAadhar+ "', " + totalCampCapacity + ", '" + capacityFull + "');"
         cur.execute(query)
         print("Total rows affected = {}".format(cur.rowcount))
         cur.close()
         conn.close()
 
+    def __removeCampDetails(self, campName):
+        cur,conn = self.connect("all_camp_details")
+        tableName = "campdet2021"
+
+        query = "Delete from " + tableName + " where campId = '" + campName[4:] + "';"
+        cur.execute(query)
+        print("Total rows affected = {}".format(cur.rowcount))
+        cur.close()
+        conn.close()
 
     def registerCamp(self):
         """ in technical terms: Creates a new database for a new camp """
@@ -79,31 +89,33 @@ class SysAdmin(Database):
                 
             if cur.rowcount == 0:
                 print("No relation found in " + campName)
-                cur.close()
-                conn.close()
-                return
             else:
                 print("All these relations exist in " + campName + " :")
                 for table in cur.fetchall():
                     print(table[0], end=' ')
-                
-                print("\n[Note: This action is irreversible and you will lose all the data of this camp]")
-                consent = input("Are you sure you want to de-register this camp?(y/n): ")
+            
+            print("\n[Note: This action is irreversible and you will lose all the data of this camp]")
+            consent = input("Are you sure you want to de-register this camp?(y/n): ")
 
-                if consent.lower() == 'y':
-                    # close connection with current database
-                    cur.close()
-                    conn.close()
-                    # connect to default database
-                    cur,conn = self.connect()
-                    # drop the desired database
-                    cur.execute("DROP DATABASE " + campName + ";")
-                    print("Successfully de-registered " + campName)
-                else:
-                    print("Operation Aborted!")            
-                # close connection with whatever database is connected
+            if consent.lower() == 'y':
+                # close connection with current database
                 cur.close()
                 conn.close()
+                # connect to default database
+                cur,conn = self.connect()
+                # drop the desired database
+                cur.execute("DROP DATABASE " + campName + ";")
+                
+                # also remove it's information from all_camps_details
+                self.__removeCampDetails(campName)
+                print("Successfully de-registered " + campName)
+            else:
+                print("Operation Aborted!")            
+            # close connection with whatever database is connected
+            cur.close()
+            conn.close()
+        else:
+            print("Error! There is no camp as " + campName)
 
 
     def readCamp(self):

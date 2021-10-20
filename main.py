@@ -40,10 +40,7 @@ def main():
                 exit(0)
             else:
                 print("Error!! wrong choice")
-    # else:
-    #     print("\nWrong Password, Access Denied!")
-    #     exit(0)
-    
+
     elif which_portal.lower() == 'c':
         dbase = Database()
         campId = input("Enter your camp ID: ")
