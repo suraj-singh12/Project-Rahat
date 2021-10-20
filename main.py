@@ -4,15 +4,6 @@ import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 # important to import and enable isolation_level_autocommot otherwise database creation fails
 
-# usrname = "postgres"
-# psswd = "toor"
-
-# conn = psycopg2.connect(
-#     host="localhost",
-#     database="testingbase",
-#     user=usrname,
-#     password=psswd)
-
 from config import config
 
 def connect(database=''):
@@ -23,50 +14,24 @@ def connect(database=''):
         params = config()
 
         # connect to the PostgreSQL server
-        # print('\nConnecting to the PostgreSQL database...')   #-----------
-        if database != '':      # if a database is specified during connection, then connect to that otherwise default
+        # if a database is specified during connection, then connect to that otherwise default
+        if database != '':      
             params['database'] = database
-        
         conn = psycopg2.connect(**params)
 
         conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
         # enabled isolation_level_autocommit ; now databases can be created without issue
+        # print("Connected successfully.\n")
 
-        # print("Connected successfully.\n")    #-----------
         # create a cursor
         cur = conn.cursor()
-        
-	    # execute a statement
-        # print('PostgreSQL database version:')
-        # cur.execute('SELECT version();')
-
-        # display the PostgreSQL database server version
-        # db_version = cur.fetchone()
-        # print(db_version)
-        
-        # printing tables of 'testingbase' database
-        # print('\ntestingbase tables :')
-        # cur.execute("""SELECT * FROM information_schema.tables WHERE table_schema = 'public'""")
-        # for table in cur.fetchall():
-        #     print(table[2])
-        # print()
-
-        # print the contents of students
-        # cur.execute('select * from students')
-        # for tupl in cur.fetchall():
-        #     print(tupl)
-       
-	    # close the communication with the PostgreSQL
-        # cur.close()
         return cur,conn
+
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
-    # finally:
-    #     if conn is not None:
-    #         conn.close()
-    #         print('Database connection closed.')
 
-def listAllCamps(cur):
+
+def listAllDatabases(cur):
     # list all databases
     cur.execute("SELECT datname FROM pg_database;")
     db_list = list()
@@ -78,7 +43,7 @@ def isPresentCamp(database):
     # connect to default database
     cur, conn = connect()
     # list all databases present in system (i.e. all registered camps)
-    db_list = listAllCamps(cur)
+    db_list = listAllDatabases(cur)
     # close cursor and connection with default database
     cur.close()
     conn.close()
@@ -88,8 +53,8 @@ def isPresentCamp(database):
         return True
     return False
 
-''' -------- System Admin portal functions -------- '''
 
+''' -------- System Admin portal functions -------- '''
 def registerCamp():
     """ in technical terms: Creates a new database for a new camp """
     
@@ -104,7 +69,6 @@ def registerCamp():
     else:
         print("Camp " + campName + " already exists!!")
     
-
 
 def deRegister():
     """ in technical terms: drop a database"""
@@ -141,8 +105,7 @@ def deRegister():
                 cur.execute("DROP DATABASE " + campName + ";")
                 print("Successfully de-registered " + campName)
             else:
-                print("Operation Aborted!")
-            
+                print("Operation Aborted!")            
             # close connection with whatever database is connected
             cur.close()
             conn.close()
@@ -191,16 +154,20 @@ def readRelation():
         print("Error! " + campName + " is not a registered camp")
 
 
-def listAllCamps():
+def listAllDatabases():
     """ Lists out the information of all camps registered """
     cur,conn = connect("all_camp_details")
-    # year = input("Enter the year of which camps you want to access (yyyy): ")
-    tableName = "campdet" + "2021"
+    year = input("Enter the year of which camps you want to access (yyyy): ")
+    while (len(year) != 4) or (year.isnumeric() == False) or (year[0:3] != "202"):
+        print("Try again.. It is not a valid year.")
+        year = input("Enter the year of which camps you want to access (yyyy):")
+    tableName = "campdet" + year
     
     print("1. Print campNames only")
     print("2. Print details of all camps")
     print("3. Print full details of a specific camp")
     choice = int(input("Enter your choice: "))
+
     if choice == 1:
         print("All camps registered in 2021 are: ")
         cur.execute("select * from " + tableName + ";")
@@ -270,10 +237,12 @@ def listAllCamps():
     cur.close()
     conn.close()
 
+
 ''' -------- CampAdmin portal functions -------- '''
 def readThis(campName):
     in_pass = input("Enter your password again: ")
-    # read passwords file [dummy now]
+
+    # read passwords file (this file is on server)
     params = config("passwords.ini","camps")
     ac_pass = params.get(campName)
 
@@ -322,16 +291,19 @@ def feedback():
 def checkDonationStatus():
     pass
 
-
 ''' -------- Driver function -------- '''
-if __name__ == '__main__':
-    # cur = connect()
+def main():
     
     which_portal = input("Select a portal (Camp-Admin (c)/System-Admin (s)): ")
+    
     if which_portal.lower() == 's':
         pswd = input("Enter password to access System-Admin portal: ")
-        # password check method (dummy)
-        if pswd == "IamSysAdmin99":
+        # password check method
+        # read passwords file (this file is on server)
+        params = config("passwords.ini","Admin")
+        ac_pass = params.get("SysAdmin")
+        
+        if ac_pass is not None and  pswd == ac_pass:
             choice = -1
             while choice != 0:
                 print("\n----------Welcome to Admin portal-----------")
@@ -339,7 +311,6 @@ if __name__ == '__main__':
                 print("2. Deregister an accidentally registered camp")
                 print("3. Read the relations of a camp")
                 print("4. List all camps and their details")
-                # print("4. Request detail modification of a camp's relation")
                 print("0. Exit")
                 choice = int(input("Enter your choice: "))
                 if choice == 1:
@@ -349,7 +320,7 @@ if __name__ == '__main__':
                 elif choice == 3:
                     readRelation()
                 elif choice == 4:
-                    listAllCamps()
+                    listAllDatabases()
                 elif choice == 0:
                     print("Exiting ...")
                     exit(0)
@@ -362,16 +333,8 @@ if __name__ == '__main__':
     elif which_portal.lower() == 'c':
         campId = input("Enter your camp ID: ")
         campName = "camp"  + campId
-        cur,conn = connect()
-        cur.execute("SELECT datname from pg_database;")
-        db_list = list()
-        for db in cur.fetchall():
-            db_list.append(db[0])
-        
-        cur.close()
-        conn.close()
 
-        if (campName) not in db_list:
+        if not isPresentCamp(campName):
             print("Error!! There's no camp with id " + campId)
             exit(-1)
         else:
@@ -454,4 +417,8 @@ if __name__ == '__main__':
                 
             else:
                 print("Wrong Password, Access Denied !")
-            
+
+
+if __name__ == '__main__':
+    main()
+
