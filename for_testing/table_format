@@ -1,0 +1,43 @@
+create table main_table2021(
+family_id varchar(20) not null, 
+member_no int not null,
+name varchar(40) not null,
+age int not null,
+gender char(1) not null,
+relation varchar(10) not null,
+vill_or_city varchar(50) not null,
+loc_in_vill_or_city varchar(70) not null,
+inCamp char(1) not null,
+joinedOn date,
+leftOn date,
+injury char(1) not null,
+primary key (family_id, member_no)
+);
+
+
+create table injury_table2021(
+family_id varchar(20) not null,
+member_no int not null,
+injury_description varchar(200) not null,
+injury_level char(1) not null,
+recovery_initiated char(1) not null,
+recovery_percent int not null,
+foreign key(family_id, member_no) references main_table2021
+);
+
+
+insert into main_table2021 values('FLY1001', 1, 'DemoName', 35, 'M','self','Narayanpur','near Hariram', 'Y', '2021-10-21', null, 'Y');
+insert into main_table2021 values('FLY1001', 2, 'Person2', 40, 'M','brother','Narayanpur','near Hariram', 'N', '2021-10-21', null, 'Y');
+insert into main_table2021 values('FLY1002', 1, 'xgcds', 48, 'M','self','Narayanpur','near Hariram', 'Y', '2021-10-22', null, 'Y');
+"FLY1001"	1	"DemoName"	35	"M"	"self"	"Narayanpur"	"near Hariram"	"Y"	"2021-10-21"		"Y"
+"FLY1001"	2	"Person2"	40	"M"	"brother"	"Narayanpur"	"near Hariram"	"N"	"2021-10-21"		"Y"
+"FLY1002"	1	"xgcds"	48	"M"	"self"	"Narayanpur"	"near Hariram"	"Y"	"2021-10-22"		"Y"
+
+
+insert into injury_table2021 values('FLY1001', 1, 'xyz bone fracture', 'L', 'Y', 10);
+insert into injury_table2021 values('FLY1002', 1, 'xyz bone fracture', 'L', 'Y', 54);
+"FLY1001"	1	"xyz bone fracture"	"L"	"Y"	10
+"FLY1002"	1	"asdfkafd"	"L"	"Y"	54
+
+select i.family_id, i.member_no, injury_description, injury_level, recovery_initiated, recovery_percent from injury_table2021 as i, main_table2021 as mn
+where mn.family_id=i.family_id and mn.injury='Y' and mn.inCamp='Y';
