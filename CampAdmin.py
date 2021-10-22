@@ -87,10 +87,17 @@ class CampAdmin(Database):
             print("Error! invalid input, try again.")
             gender = input("Gender (M/F): ").upper()
 
+        # this will be useful later on also while querying the dbase, also it is an important aspect that must be known
+        relation = input("Relation? (Self/Mother/Father/Brother/Sister/Cousin): ").lower()
+        while relation not in ("self","mother", "father", "brother", "sister", "cousin"):
+            print("Enter a valid relation !")
+            relation = input("Relation? (Self/Mother/Father/Brother/Sister/Cousin): ")
+
         if member_no == 1:        # only family mmeber1 will enter address, for other it is same
             CampAdmin.vill_city = input("Village/City: ")
             CampAdmin.loc_in_vc = input("Location in village/city: ")
-
+            relation = "self"
+        
         inCamp = input("Person will be in camp? (y/n)").upper()
         if len(inCamp) != 1 or inCamp not in ('Y','N'):
             print("Invalid input, only enter one character (y/n)")
@@ -125,11 +132,11 @@ class CampAdmin(Database):
         # there is a minute difference between queries in if and else        
         if joinedOn != 'null':
             query_data = "'" + family_id + "', " + str(member_no) + ", '" + name + "', " + age + ", '" + \
-            gender + "', '" + CampAdmin.vill_city + "', '" + CampAdmin.loc_in_vc + "', '" + inCamp + "', '" + \
+            gender + "', '" + relation + "', '" +  CampAdmin.vill_city + "', '" + CampAdmin.loc_in_vc + "', '" + inCamp + "', '" + \
             joinedOn + "', " + leftOn + ", '" + injury + "'"
         else:
             query_data = "'" + family_id + "', " + str(member_no) + ", '" + name + "', " + age + ", '" + \
-            gender + "', '" + CampAdmin.vill_city + "', '" + CampAdmin.loc_in_vc + "', '" + inCamp + "', " + \
+            gender + "', '" + relation + "', '" + CampAdmin.vill_city + "', '" + CampAdmin.loc_in_vc + "', '" + inCamp + "', " + \
             joinedOn + ", " + leftOn + ", '" + injury + "'"
 
         query = "INSERT INTO main_table2021 values (" + query_data + ");"
