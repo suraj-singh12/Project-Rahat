@@ -61,7 +61,7 @@ class SysAdmin(Database):
             
             # connect to default database
             cur,conn = self.connect()
-
+            
             # create database campName
             createDatabase = "CREATE DATABASE " + campName + ";"
             cur.execute(createDatabase)
@@ -86,7 +86,7 @@ class SysAdmin(Database):
             cur,conn = self.connect(campName)
             # find all existing relations/tables in database
             cur.execute("SELECT * FROM information_schema.tables WHERE table_schema = 'public'")
-                
+            
             if cur.rowcount == 0:
                 print("No relation found in " + campName)
             else:
