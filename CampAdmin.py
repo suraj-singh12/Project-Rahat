@@ -67,7 +67,9 @@ class CampAdmin(Database):
         # print(query)
         return query
 
-
+    # static variables
+    vill_city = ''
+    loc_in_vc = ''
     def __readDataForQuery(self, member_no:int):
 
         print("Enter the below details carefully: ")
@@ -84,9 +86,10 @@ class CampAdmin(Database):
         while(gender not in ('M', 'F')):
             print("Error! invalid input, try again.")
             gender = input("Gender (M/F): ").upper()
-        
-        vill_city = input("Village/City: ")
-        loc_in_vc = input("Location in village/city: ")
+
+        if member_no == 1:        # only family mmeber1 will enter address, for other it is same
+            CampAdmin.vill_city = input("Village/City: ")
+            CampAdmin.loc_in_vc = input("Location in village/city: ")
 
         inCamp = input("Person will be in camp? (y/n)").upper()
         if len(inCamp) != 1 or inCamp not in ('Y','N'):
@@ -119,11 +122,15 @@ class CampAdmin(Database):
         if injury == 'Y':
             query2 = self.__getInjuryRecords(family_id, member_no)
         
-        
+        # there is a minute difference between queries in if and else        
         if joinedOn != 'null':
-            query_data = "'" + family_id + "', " + str(member_no) + ", '" + name + "', " + age + ", '" + gender + "', '" + vill_city + "', '" + loc_in_vc + "', '" + inCamp + "', '" + joinedOn + "', " + leftOn + ", '" + injury + "'"
+            query_data = "'" + family_id + "', " + str(member_no) + ", '" + name + "', " + age + ", '" + \
+            gender + "', '" + CampAdmin.vill_city + "', '" + CampAdmin.loc_in_vc + "', '" + inCamp + "', '" + \
+            joinedOn + "', " + leftOn + ", '" + injury + "'"
         else:
-            query_data = "'" + family_id + "', " + str(member_no) + ", '" + name + "', " + age + ", '" + gender + "', '" + vill_city + "', '" + loc_in_vc + "', '" + inCamp + "', " + joinedOn + ", " + leftOn + ", '" + injury + "'"
+            query_data = "'" + family_id + "', " + str(member_no) + ", '" + name + "', " + age + ", '" + \
+            gender + "', '" + CampAdmin.vill_city + "', '" + CampAdmin.loc_in_vc + "', '" + inCamp + "', " + \
+            joinedOn + ", " + leftOn + ", '" + injury + "'"
 
         query = "INSERT INTO main_table2021 values (" + query_data + ");"
         # print(query, query2)
