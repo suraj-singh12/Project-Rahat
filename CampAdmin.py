@@ -18,7 +18,7 @@ class CampAdmin(Database):
         in_pass = input("Enter your password again: ")
 
         # read passwords file (this file is on server)
-        params = config("passwords.ini","camps")
+        params = config("passwords.ini","camp_admin")
         ac_pass = params.get(campName)
 
         # password is not null and matches then proceed to connect 
@@ -26,7 +26,7 @@ class CampAdmin(Database):
             # connect to camp's database
             cur,conn = self.connect(campName)
             
-            relationName = "main_table_2021"             # supposing main_table exists
+            relationName = "main_table2021"             # supposing main_table exists
             cur.execute("SELECT * from " + relationName + ";")
             if cur.rowcount == 0:
                 print("No records found!")
