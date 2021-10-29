@@ -15,6 +15,13 @@ primary key (family_id, member_no)
 );
 
 
+insert into main_table2021 values('FLY1001', 1, 'DemoName', 35, 'M','self','Narayanpur','near Hariram', 'Y', '2021-10-21', null, 'Y');
+insert into main_table2021 values('FLY1001', 2, 'Person2', 40, 'M','brother','Narayanpur','near Hariram', 'N', '2021-10-21', null, 'Y');
+insert into main_table2021 values('FLY1002', 1, 'xgcds', 48, 'M','self','Narayanpur','near Hariram', 'Y', '2021-10-22', null, 'Y');
+"FLY1001"	1	"DemoName"	35	"M"	"self"	"Narayanpur"	"near Hariram"	"Y"	"2021-10-21"		"Y"
+"FLY1001"	2	"Person2"	40	"M"	"brother"	"Narayanpur"	"near Hariram"	"N"	"2021-10-21"		"Y"
+"FLY1002"	1	"xgcds"	48	"M"	"self"	"Narayanpur"	"near Hariram"	"Y"	"2021-10-22"		"Y"
+
 create table injury_table2021(
 family_id varchar(20) not null,
 member_no int not null,
@@ -26,18 +33,49 @@ foreign key(family_id, member_no) references main_table2021
 );
 
 
-insert into main_table2021 values('FLY1001', 1, 'DemoName', 35, 'M','self','Narayanpur','near Hariram', 'Y', '2021-10-21', null, 'Y');
-insert into main_table2021 values('FLY1001', 2, 'Person2', 40, 'M','brother','Narayanpur','near Hariram', 'N', '2021-10-21', null, 'Y');
-insert into main_table2021 values('FLY1002', 1, 'xgcds', 48, 'M','self','Narayanpur','near Hariram', 'Y', '2021-10-22', null, 'Y');
-"FLY1001"	1	"DemoName"	35	"M"	"self"	"Narayanpur"	"near Hariram"	"Y"	"2021-10-21"		"Y"
-"FLY1001"	2	"Person2"	40	"M"	"brother"	"Narayanpur"	"near Hariram"	"N"	"2021-10-21"		"Y"
-"FLY1002"	1	"xgcds"	48	"M"	"self"	"Narayanpur"	"near Hariram"	"Y"	"2021-10-22"		"Y"
-
 
 insert into injury_table2021 values('FLY1001', 1, 'xyz bone fracture', 'L', 'Y', 10);
 insert into injury_table2021 values('FLY1002', 1, 'xyz bone fracture', 'L', 'Y', 54);
 "FLY1001"	1	"xyz bone fracture"	"L"	"Y"	10
 "FLY1002"	1	"asdfkafd"	"L"	"Y"	54
 
+--  query to find the recovery details of all those having injury
 select i.family_id, i.member_no, injury_description, injury_level, recovery_initiated, recovery_percent from injury_table2021 as i, main_table2021 as mn
 where mn.family_id=i.family_id and mn.injury='Y' and mn.inCamp='Y';
+
+-- 
+
+--------------------------------------------------------------------
+all_camp_details
+--------------------------------------------------------------------
+create table campdet2021(
+campID varchar(20) primary key,
+campName varchar(20) not null,
+state varchar(20) not null,
+district varchar(20) not null,
+city_or_village varchar(20) not null,
+coordinates varchar(50) not null,
+camp_admin varchar(20) not null,
+camp_admin_aadhar varchar(12) unique not null,
+email varchar(25) not null,
+mobile varchar(10) not null,
+total_camp_capacity int not null,
+capacity_full char(1) not null
+);
+
+insert into campdet2021 values('27b4677','camp27b4677','Assam','Lakhimpur','Narayanpur','26.950841, 93.859420','Narayan','123456789876','example@main.com','1234567890', 400,'N');
+
+
+create table support_members2021(
+campId varchar(20) not null,
+Support_member varchar(20) not null,
+member_aadhar varchar(12) unique not null,
+email varchar(25) not null,
+mobile varchar(10) not null,
+foreign key (campId) references campdet2021(campId)
+);
+
+insert into support_members2021 values(
+'27b4677', 'Lokesh','243567898567','email@mail.com','1234567890');
+insert into support_members2021 values(
+'27b4677', 'Pratap','243567432267','email@mail.com','1234567890');
