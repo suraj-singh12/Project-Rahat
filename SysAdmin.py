@@ -1,16 +1,18 @@
 from Database import Database
+import datetime
 
 class SysAdmin(Database):
     ''' -------- System Admin portal functions -------- '''
     
     usrType = "sys_admin"
     identity = "sysadmin"
+    thisYear = str(datetime.datetime.now().year)
 
     def __init__(self, pswd):
         if not self.validate(SysAdmin.usrType, SysAdmin.identity, pswd):
             print("Authentication Failed !")
             exit(-1)
-    # private method
+
     def __setCampDetails(self, campName):
         print("Enter the below information correctly: ")
         campId = campName[4:]
@@ -26,15 +28,28 @@ class SysAdmin(Database):
         print("=> Enter Camp Admin Details: ")
         campAdminName = input("Name: ")
         campAdminAadhar = input("Aadhar: ")
+        while len(campAdminAadhar) != 12:
+            print("Error, invalid aadhar number. Try again")
+            campAdminAadhar = input("Aadhar: ")
+        
+        email = input("Email: ")
+        mobile = input("Phone Number: ")
+        while len(mobile) != 10:
+            print("Error, invalid phone number. Enter 10 digit valid phone number")
+            mobile = input("Phone Number: ")
 
         print("=> Camp Related")
         totalCampCapacity = input("Total capacity of camp (in numbers): ")
         capacityFull = 'N'
 
         cur, conn = self.connect("all_camp_details")
-        tableName = "campdet2021"
+        tableName = "campdet" + SysAdmin.thisYear
 
-        query= "INSERT INTO " + tableName + " values ('" + campId + "', '" + campName + "', '" + state + "', '" + district + "', '" + cityOrVillage + "', '" + coord + "', '" + campAdminName + "', '" + campAdminAadhar+ "', " + totalCampCapacity + ", '" + capacityFull + "');"
+        query_data = "'" + campId + "', '" + campName + "', '" + state + "', '" + district + "', '" + cityOrVillage + "', '" \
+            + coord + "', '" + campAdminName + "', '" + campAdminAadhar + "', '" + email + "', '" + mobile + "', " \
+            + totalCampCapacity + ", '" + capacityFull + "'"
+
+        query= "INSERT INTO " + tableName + " values (" + query_data +  ");"
         cur.execute(query)
         print("Total rows affected = {}".format(cur.rowcount))
         cur.close()
@@ -42,7 +57,7 @@ class SysAdmin(Database):
 
     def __removeCampDetails(self, campName):
         cur,conn = self.connect("all_camp_details")
-        tableName = "campdet2021"
+        tableName = "campdet" + SysAdmin.thisYear
 
         query = "Delete from " + tableName + " where campId = '" + campName[4:] + "';"
         cur.execute(query)
@@ -192,7 +207,7 @@ class SysAdmin(Database):
 
         elif choice == 2:
             print("Details of all camps registered in year 2021: ")
-            header = ["campId","campName","state","district","city_or_village","coordinates","Admin","Admin_Aadhar","Total Capacity","Capacity Full?"]
+            header = ["campId","campName","state","district","city_or_village","coordinates","Admin","Admin_Aadhar","email","phone","Total Capacity","Capacity Full?"]
             for item in header:
                 print(item,end='\t')
             print()
@@ -205,7 +220,7 @@ class SysAdmin(Database):
                 print()
         
         elif choice == 3:
-            print("All camps registered in year 2021 are: ")
+            print("All camps registered in year " + SysAdmin.thisYear + " are: ")
             cur.execute("select * from " + tableName + ";")
             camps = []
             for item in cur.fetchall():
@@ -221,7 +236,7 @@ class SysAdmin(Database):
                 """ print the details of the camp with details of support members too """
                 
                 print()
-                header = ["campId","campName","state","district","city_or_village","coordinates","Admin","Admin_Aadhar","Total Capacity","Capacity Full?"]
+                header = ["campId","campName","state","district","city_or_village","coordinates","Admin","Admin_Aadhar","email","phone","Total Capacity","Capacity Full?"]
                 for item in header:
                     print(item,end='\t')
                 print()
@@ -238,10 +253,12 @@ class SysAdmin(Database):
                 print()
 
                 # print details of support members
-                header = ["Member Name", "Member Aadhar"]
-                print(header[0], '\t', header[1])
+                header = ["Member Name", "Member Aadhar","email","phone"]
+                for item in header:
+                    print(item,end="\t")
+                print()
                 
-                cur.execute("select * from support_members2021 where campId = '" + idd + "';")
+                cur.execute("select * from support_members" + SysAdmin.thisYear + " where campId = '" + idd + "';")
                 for row in cur.fetchall():
                     for item in row[1:]:
                         print(item,end='\t')
