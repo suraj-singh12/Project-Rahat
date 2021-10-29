@@ -85,7 +85,7 @@ def main():
                 # according call (4)
                 # Also there would be date when this person entered in camp
 
-                print("3. Remove an existing Record")       # not to be given
+                print("3. Update details of a person")
                 # also a col containing LeftDate needs to be updated
                 print("4. Direct an Person to other camp (requires informing the other side)")
                 print("5. Find vacancies in nearby camps")
@@ -108,7 +108,7 @@ def main():
                 elif choice == 2:
                     admin.writeInto(campName)
                 elif choice == 3:
-                    admin.removeFrom(campName)          # not to be given
+                    admin.updateDetails(campName)
                 elif choice == 4:
                     admin.directFrom(campName)
                 elif choice == 5:

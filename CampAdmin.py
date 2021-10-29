@@ -1,18 +1,45 @@
 from config import config
+import datetime     # for current year
 
 from Database import Database
 
 class CampAdmin(Database):
     ''' -------- CampAdmin portal functions -------- '''
-    total_person = 0    # this needs to be counted from dbase; rather stored
-    family_id = 1000    # this is invalid id always
+    total_person = 0            # this set by __set_class_info(campName)
+    new_family_id = 'FLY1000'       # this is invalid, set correctly by __set_class_info(campName)
     usrType = "camp_admin"
+    thisYear = str(datetime.datetime.now().year)
+
+    def __set_class_info(self, campName: str):
+        # connect to this camp
+        cur, conn = self.connect(campName)
+        tableName = "main_table" + str(CampAdmin.thisYear)
+
+        # set total no of people in camp
+        query = "select count(*) from " + tableName + " where incamp = 'Y';"
+        cur.execute(query)
+        CampAdmin.total_person = int(cur.fetchone()[0])
+
+        # find max family id
+        query = "select max(family_id) from " + tableName + ";"
+        cur.execute(query)
+        max_id = str(cur.fetchone()[0])
+
+        # set max+1 (new) family ID [available]
+        inc = int(max_id[3:])
+        inc = inc + 1
+        CampAdmin.new_family_id = max_id[0:3] + str(inc)
+
+        cur.close()
+        conn.close()
+
 
     def __init__(self, identity, pswd):
         self.identity = identity
         if not self.validate(CampAdmin.usrType, self.identity, pswd):
             print("Authentication Failed !")
             exit(-1)
+        self.__set_class_info(identity)
     
     def readThis(self, campName:str):
         in_pass = input("Enter your password again: ")
@@ -26,7 +53,9 @@ class CampAdmin(Database):
             # connect to camp's database
             cur,conn = self.connect(campName)
             
-            relationName = "main_table2021"             # supposing main_table exists
+            relationName = "main_table" + CampAdmin.thisYear 
+
+            # print details of people in camp
             cur.execute("SELECT * from " + relationName + ";")
             if cur.rowcount == 0:
                 print("No records found!")
@@ -51,16 +80,15 @@ class CampAdmin(Database):
         rec_init = input("Whether recovery initiated? (y/n): ").upper()
 
         while rec_init not in ('Y','N'):
-            print("Invalid input. Try again !")
+            print("Error, invalid input. Try again !")
             rec_init = input("Whether recovery initiated? (y/n): ").upper()
 
         rec_perc = '0'
         if rec_init == 'Y':
             rec_perc = input("Recovery percentage? (0-100): ")
-
-        while int(rec_perc) > 100 or int(rec_perc) < 0:
-            print("Invalid input, try again !")
-            rec_perc = input("Recovery percentage? (0-100): ")
+            while int(rec_perc) < 0 or int(rec_perc) > 100:
+                print("Error, invalid percentage. Enter percentage from [0-100]")
+                rec_perc = input("Recovery percentage? (0-100): ")
 
         query_data = "'" + familyId + "', " + str(memberNo) + ", '" + descr + "', '" + level + "', '" + rec_init + "', " + rec_perc
         query = "INSERT INTO injury_table2021 values (" + query_data + ");"
@@ -74,13 +102,14 @@ class CampAdmin(Database):
 
         print("Enter the below details carefully: ")
         
-        family_id = "FLY" + str(CampAdmin.family_id)
+        family_id = CampAdmin.new_family_id
         # member_no already recieved
         name = input("Name: ")
-        age = input("Age: ")
+
+        age = input("Age (in years): ")
         if (not int(age)) or int(age) > 110 or int(age) <= 0:
             print("Error! enter a valid age: ")
-            age = input("Age: ")
+            age = input("Age (in years): ")
         
         gender = input("Gender (M/F): ").upper()
         while(gender not in ('M', 'F')):
@@ -97,28 +126,22 @@ class CampAdmin(Database):
             CampAdmin.vill_city = input("Village/City: ")
             CampAdmin.loc_in_vc = input("Location in village/city: ")
             relation = "self"
+        else:
+            # only first member can have relation self, others are related to him somehow but not self 
+            while relation == "self":
+                print("Error, invalid relation! Enter a valid relation with member 1")
+                relation = input("Relation? (Self/Mother/Father/Brother/Sister/Cousin): ")
         
         inCamp = input("Person will be in camp? (y/n)").upper()
-        if len(inCamp) != 1 or inCamp not in ('Y','N'):
+        if inCamp not in ('Y','N'):
             print("Invalid input, only enter one character (y/n)")
             inCamp = input("Person will be in camp? (y/n)").upper()
         
         joinedOn = 'null'
         leftOn = 'null'
         if inCamp == 'Y':
-            cur, conn = self.connect()
-            # get today's date
-            cur.execute("SELECT current_date;")
-
-            joinedOn = cur.fetchone()[0]
-            joinedOn = str(joinedOn)    # today's date set
-            
-            cur.close()
-            conn.close()
-
-            # also update people count in camp
-            CampAdmin.total_person += 1
-
+            todayDate = str(datetime.datetime.now())[0:10]
+            joinedOn = todayDate
         
         injury = input("Is there any injury? (y/n)").upper()
         while injury not in ('Y','N'):
@@ -141,7 +164,6 @@ class CampAdmin(Database):
 
         query = "INSERT INTO main_table2021 values (" + query_data + ");"
         # print(query, query2)
-
         return query, query2
 
 
@@ -158,20 +180,12 @@ class CampAdmin(Database):
 
             # connect to camp's database
             cur,conn = self.connect(campName)
-            
-            relationName = "main_table2021"             # supposing main_table exists
-
-            # find the last family ID
-            cur.execute("select family_id from " + relationName + ";")
-            id_list = cur.fetchall()
-            # set the max Family ID
-            CampAdmin.family_id = max(id_list)[0]
 
             members = int(input("Enter the number of members in family: "))
             queries = []
             for member_no in range(1,members+1):
                 queries.append(self.__readDataForQuery(member_no))
-            print(queries)
+            # print(queries)
 
             count = 0
             for query in queries:
@@ -184,14 +198,12 @@ class CampAdmin(Database):
             conn.close()
             print("Total rows affected {}".format(count))
 
-
-        
     
     def updateFamilyDetails():
         # if a member of family comes later, only need to update certain details in his family for him, like inCamp, date of joining etc
         pass
 
-    def removeFrom(self, campName):
+    def updateDetails(self, campName):
     # CampAdmin.total_count += 1 
         pass
 
