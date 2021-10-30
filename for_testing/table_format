@@ -1,3 +1,6 @@
+--------------------------------------------------------------------------
+A camp contains: main_tableYEAR, injury_tableYEAR, regular_supply_table2021, medical_supply_table2021
+--------------------------------------------------------------------------
 create table main_table2021(
 family_id varchar(20) not null, 
 member_no int not null,
@@ -45,9 +48,43 @@ where mn.family_id=i.family_id and mn.injury='Y' and mn.inCamp='Y';
 
 -- 
 
+
+regular_supply_tableYEAR
+item_name 
+item_type
+description
+qty
+
+create table regular_supply_table2021(
+item_name varchar(50) not null primary key,
+item_type varchar(20) not null,
+description varchar(100) not null,
+qty int not null
+);
+
+
+medicin_supply_tableYEAR
+item_name : PCM 500 mg
+item_type : tab (,oint,gel, etc)
+item_description : used to relieve headache, fever, and pain in body
+age_groups: all (or 6-10 etc)
+qty: 98
+
+create table medical_supply_table2021(
+item_name varchar(50) not null primary key,
+item_type varchar(20) not null,
+description varchar(100) not null,
+age_groups varchar(10) not null,
+qty int not null
+);
+insert into medical_supply_table2021 values('PCM 500mg','tab','used to relieve headache, fever, and pain in body','all',800);
+insert into medical_supply_table2021 values('Calcium Tab 500mg','tab','releive joint pain due to lack of calcium in bones','all',400);
+
+
 --------------------------------------------------------------------
 all_camp_details
 --------------------------------------------------------------------
+
 create table campdet2021(
 campID varchar(20) primary key,
 campName varchar(20) not null,
