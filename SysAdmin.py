@@ -33,10 +33,10 @@ class SysAdmin(Database):
             campAdminAadhar = input("Aadhar: ")
         
         email = input("Email: ")
-        mobile = input("Phone Number: ")
-        while len(mobile) != 10:
+        phone = input("Phone Number: ")
+        while len(phone) != 10:
             print("Error, invalid phone number. Enter 10 digit valid phone number")
-            mobile = input("Phone Number: ")
+            phone = input("Phone Number: ")
 
         print("=> Camp Related")
         totalCampCapacity = input("Total capacity of camp (in numbers): ")
@@ -46,7 +46,7 @@ class SysAdmin(Database):
         tableName = "campdet" + SysAdmin.thisYear
 
         query_data = "'" + campId + "', '" + campName + "', '" + state + "', '" + district + "', '" + cityOrVillage + "', '" \
-            + coord + "', '" + campAdminName + "', '" + campAdminAadhar + "', '" + email + "', '" + mobile + "', " \
+            + coord + "', '" + campAdminName + "', '" + campAdminAadhar + "', '" + email + "', '" + phone + "', " \
             + totalCampCapacity + ", '" + capacityFull + "'"
 
         query= "INSERT INTO " + tableName + " values (" + query_data +  ");"
