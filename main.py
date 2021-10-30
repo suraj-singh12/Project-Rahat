@@ -1,11 +1,10 @@
 # RAHAT v1.0
-
-
 # important to import and enable isolation_level_autocommot otherwise database creation fails
 from Database import Database
 from config import config
 from SysAdmin import SysAdmin
 from CampAdmin import CampAdmin
+import os
 
 ''' -------- Driver function -------- '''
 def main():
@@ -19,6 +18,8 @@ def main():
         # if admin != None:     # this was ineffective, and we don't even need such a check 
                             # because if password is wrong, the creation of object named `admin` fails and program terminates instantly
         choice = -1
+        os.system("cls")
+
         while choice != 0:
             print("\n----------Welcome to Admin portal-----------")
             print("1. Register a camp")
@@ -40,6 +41,9 @@ def main():
                 exit(0)
             else:
                 print("Error!! wrong choice")
+            
+            input("Enter a key to continue...")
+            os.system("cls")
 
     elif which_portal.lower() == 'c':
         dbase = Database()
@@ -54,6 +58,7 @@ def main():
             del dbase
             pswd = input("Enter password of camp" + campId + ": ")
             admin = CampAdmin(campName, pswd)
+            os.system("cls")
             
             # if admin != None:     # this was ineffective, and we don't even need such a check 
                             # because if password is wrong, the creation of object named `admin` fails and program terminates instantly
@@ -73,7 +78,6 @@ def main():
 
             choice = -1
             while choice != 0:
-                # cur, conn = connect("camp"+campId)    # no need to connect here
                 print("\n----------Welcome to CampAdmin portal-----------") 
                 print("Connected to your camp camp" + campId + "\n")
                 print("1. Read Record(s)")
@@ -87,19 +91,19 @@ def main():
 
                 print("3. Update details of a person")
                 # also a col containing LeftDate needs to be updated
-                print("4. Direct an Person to other camp (requires informing the other side)")
-                print("5. Find vacancies in nearby camps")
-                # print("6. Find vacancies in all camps")
-                print("6. Request read access to supply data/resources of other camp")
-                print("7. Request an emergency item/resource supply from other camp(s)")
-
-                print("8. Read new entries of the day in other camps")
+                print("4. Find vacancies in nearby camps")
+                
+                print("5. Request read access to supply data/resources of other camp")
+                # need to create supply_dataYear table and a readOnlyview in each database
+                print("6. Request an emergency item/resource supply from other camp(s)")
+                # send a request, other side verify it, your database get increment in qty after recieving item by hand, their database get decrement in value by same (done manually (assigning))
+                print("7. Read new entries of the day in other camps")
                 # also allows search in today's new entries of other camps
                 # contains UniteProgram inside, so can unite the people who are found to their families
                 
-                print("9. Send Feedback to SysAdmin (to NDRF authorities)")
+                print("8. Send Feedback to SysAdmin (to NDRF authorities)")
                 # from general feedback to all types, including education of students, requirements, etc
-                print("10. Check donation status")
+                print("9. Check donation status")
                 print("0. Exit")
                 choice = int(input("Enter a choice: "))
 
@@ -130,7 +134,9 @@ def main():
                     print("Error! Invalid choice.")
                     choice = 0
                     print("Exiting...")
-            
+                
+                input("Enter a key to continue...")
+                os.system("cls")
         # else:
         #     print("Wrong Password, Access Denied !")
 
