@@ -1,5 +1,6 @@
 from config import config
 import datetime     # for current year
+import os
 
 from Database import Database
 
@@ -55,6 +56,7 @@ class CampAdmin(Database):
             
             relationName = "main_table" + CampAdmin.thisYear 
 
+            os.system("cls")
             # print details of people in camp
             cur.execute("SELECT * from " + relationName + ";")
             if cur.rowcount == 0:
@@ -99,8 +101,8 @@ class CampAdmin(Database):
     vill_city = ''
     loc_in_vc = ''
     def __readDataForQuery(self, member_no:int):
-
-        print("Enter the below details carefully: ")
+        os.system("cls")
+        print("Enter the below details carefully (member : {}): ".format(member_no))
         
         family_id = CampAdmin.new_family_id
         # member_no already recieved
@@ -117,21 +119,18 @@ class CampAdmin(Database):
             gender = input("Gender (M/F): ").upper()
 
         # this will be useful later on also while querying the dbase, also it is an important aspect that must be known
-        relation = input("Relation? (Self/Mother/Father/Brother/Sister/Cousin): ").lower()
-        while relation not in ("self","mother", "father", "brother", "sister", "cousin"):
-            print("Enter a valid relation !")
-            relation = input("Relation? (Self/Mother/Father/Brother/Sister/Cousin): ")
-
-        if member_no == 1:        # only family mmeber1 will enter address, for other it is same
+        if member_no > 1:
+            relation = input("Relation (with member 1)? (Mother/Father/Brother/Sister/Cousin): ").lower()
+            while relation not in ("mother", "father", "brother", "sister", "cousin"):
+                print("Enter a valid relation !")
+                relation = input("Relation? (Self/Mother/Father/Brother/Sister/Cousin): ")
+        else:
+            # only first member can have relation self, others are related to him somehow but not self
+            relation = "self"
+            # only family mmeber1 will enter address, for other it is same
             CampAdmin.vill_city = input("Village/City: ")
             CampAdmin.loc_in_vc = input("Location in village/city: ")
-            relation = "self"
-        else:
-            # only first member can have relation self, others are related to him somehow but not self 
-            while relation == "self":
-                print("Error, invalid relation! Enter a valid relation with member 1")
-                relation = input("Relation? (Self/Mother/Father/Brother/Sister/Cousin): ")
-        
+
         inCamp = input("Person will be in camp? (y/n)").upper()
         if inCamp not in ('Y','N'):
             print("Invalid input, only enter one character (y/n)")
@@ -143,10 +142,13 @@ class CampAdmin(Database):
             todayDate = str(datetime.datetime.now())[0:10]
             joinedOn = todayDate
         
-        injury = input("Is there any injury? (y/n)").upper()
-        while injury not in ('Y','N'):
-            print("Error! invalid input. Try again.")
+        if inCamp == 'Y':
             injury = input("Is there any injury? (y/n)").upper()
+            while injury not in ('Y','N'):
+                print("Error! invalid input. Try again.")
+                injury = input("Is there any injury? (y/n)").upper()
+        else:
+            injury = '-'    # this means status unknown (for those who aren't in camp)
 
         query2 = ''
         if injury == 'Y':
@@ -181,6 +183,7 @@ class CampAdmin(Database):
             # connect to camp's database
             cur,conn = self.connect(campName)
 
+            os.system("cls")
             members = int(input("Enter the number of members in family: "))
             queries = []
             for member_no in range(1,members+1):
@@ -198,22 +201,65 @@ class CampAdmin(Database):
             conn.close()
             print("Total rows affected {}".format(count))
 
-    
-    def updateFamilyDetails():
-        # if a member of family comes later, only need to update certain details in his family for him, like inCamp, date of joining etc
-        pass
-
     def updateDetails(self, campName):
     # CampAdmin.total_count += 1 
         pass
 
-    def directFrom(self, campName):
-        pass
-
     def findVacancies(self):
-    # find campCapacity by accessing own info from all_camps_info [it will not ask, will directly give this camp's details automatically]
-    # campCapacity - total_count
-        pass
+        ''' find vacancies in other camps, and carry people there after informing the camp admin '''
+        district = input("Enter your district: ")
+
+        cur, conn = self.connect("all_camp_details")
+        tableName = "campdet" + CampAdmin.thisYear
+        query = "select campname, camp_admin, email, phone," +\
+            "district, city_or_village, total_camp_capacity from " + tableName +\
+            " where capacity_full = 'N' and district = '" + district + "';"
+        cur.execute(query)
+
+        campDict = {}
+        for details in cur.fetchall():
+            campDict[str(details[0])] = [details[1],details[2],details[3],details[4],details[5],details[6]]
+        cur.close()
+        conn.close()
+
+        rowcount = 0
+        for campName in campDict.keys():
+            # connect to each db one by one
+            cur, conn = self.connect(str(campName))
+            # query below table and find total count of people in camp
+            tableName = "main_table" + CampAdmin.thisYear
+            query_total = "select count(*) from " + tableName + " where incamp = 'Y';"
+            cur.execute(query_total)
+            rowcount = cur.rowcount
+            total = int(cur.fetchone()[0])
+
+            values = campDict[campName]
+            # now we have vacancy count in index 5 instead of total_capacity
+            values[5] = int(values[5]) - total
+            # print(campDict[campName])
+
+            cur.close()
+            conn.close()
+        
+        os.system("cls")
+        if rowcount == 0:
+                print("------------------------------------------------------------------")
+                print("Nothing found for this district (kindly check the spelling once)")
+                print("------------------------------------------------------------------")
+                return
+        else:
+            print("--------------------------------------------------------------------------------------------------------------------------")
+            header = "campName\t Admin\t Email\t\t\t Phone\t\t District    city_or_village    vacancy"
+            print(header)
+
+            # print camp info and vacancies
+            for campName in campDict.keys():
+                print(campName,end = "\t")
+                for itms in campDict[campName]:
+                    print(itms, end = "\t")
+                print()
+            print("--------------------------------------------------------------------------------------------------------------------------")
+    
 
     def requestReadSupply(self):
         pass
