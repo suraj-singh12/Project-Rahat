@@ -1,3 +1,5 @@
+# from _typeshed import Self
+from typing import ItemsView
 from config import config
 import datetime     # for current year
 import os
@@ -261,19 +263,280 @@ class CampAdmin(Database):
             print("--------------------------------------------------------------------------------------------------------------------------")
     
 
-    def requestReadSupply(self):
-        pass
+    def readItemAvailability(self):
+        ''' find if an item is available in any camp [in a given district] '''
+        item = input("Enter item name: ")
+        itm_type = input("Enter item type (regular(r)/medical(m)): ")
+        while itm_type not in ('r','m'):
+            print("Error, invalid input! ")
+            itm_type = input("Enter item type (regular(r)/medical(m)): ")
+        
+        district = input("Enter district: ")
+        # set item type accordingly
+        if itm_type == 'r':
+            itm_type = "regular"
+        else:
+            itm_type = "medical"
+        
+        # get a list of all databases (camps, other default db)
+        cur, conn = self.connect()
+        db_list = self.listAllDatabases(cur) 
+        cur.close()
+        conn.close()
 
-    def requestGetSupply(self):
-        pass
+        os.system("cls")
+        # print relevant header
+        if itm_type == "medical":
+            header = "(campName, district, city_or_village, item_name, item_type, description, age_groups, qty)\n"
+        else:
+            header = "(campName, district, city_or_village, item_name, item_type, description, qty)\n"
+        print(header)
+
+        availCampList = list()
+        for campName in db_list:
+            if campName[0:4] == 'camp':         # if it is a camp only then proceed
+                cur, conn = self.connect(str(campName))
+                #initial check to ensure camp is from same district
+                checkQuery = "select district, city_or_village from my_camp_info where district ilike '" + \
+                    district + "' and year = '" + CampAdmin.thisYear + "';"
+                cur.execute(checkQuery)
+                # print(cur.fetchall())
+
+                if cur.rowcount == 0:
+                    cur.close()
+                    conn.close()
+                    continue
+                else:
+                    availCampList.append(campName)
+                    city_or_vill = str(cur.fetchall()[0][1])
+                    tableName = itm_type + "_supply_table" + CampAdmin.thisYear
+
+                    # query to find the item
+                    query = "select * from " + tableName + " where item_name ilike '%" + item + "%';"
+                    cur.execute(query)
+
+                    # if query result is not empty
+                    if cur.rowcount > 0:
+                        # fetch all output rows
+                        for row in cur.fetchall():
+                            # add camp name at starting, followed by district, cityName
+                            row = list(row)
+                            row.insert(0,campName)
+                            row.insert(1,district)
+                            row.insert(2,city_or_vill)
+                            row = tuple(row)
+                            # print the updated row
+                            print(row)
+                        print()
+                    
+        return availCampList
+            
+
+    def contactSupplyFromCamps(self):
+        ''' get the contact of admins of camps who have certain item available '''
+        availCampList = self.readItemAvailability()
+        if len(availCampList) > 0:
+            campName = input("Enter the campName from above list of camps: ")
+            while campName not in availCampList and campName != '0':
+                print("Error, the entered camp is not in list.")
+                print("Try again or press 0 to exit..")
+                campName = input("Enter the campName from above list of camps: ")
+            
+            # find current year admin's info
+            query = "select campid, camp_admin, mobile, email from my_camp_info where year = '" + CampAdmin.thisYear + "';"
+            header = "(CampId      campAdmin     Mobile         Email)"
+            print(header)
+
+            cur, conn = self.connect(campName)
+            cur.execute(query)
+            adminData = cur.fetchall()[0]
+            print(adminData)
+            cur.close()
+            conn.close()
+        else:
+            print("No camp in the entered district has the item you are searching for !")
+            print("Kindly Try after some time or try other district")
+
 
     def readTodayAll(self):
     # make a table containing all the TodayFound/Added in it (also they'd be added in their camps, that's obvious thing)
         pass
 
-    def feedback(self):
+    def requestSupplyFromMain(self,campName):
+        ''' send supply request to govt(sysAdmin) team '''
+
+        campId = campName[4:]
+        # get item details
+        itmName = input("Enter item name: ")
+        while len(itmName) < 2:
+            print("Enter a valid item name !!")
+            itmName = input("Enter item name: ")
+        
+        itmType = input("Enter item type (regular(r)/medical(m)): ")
+        while itmType not in ('r','m'):
+            print("Error, try again. Enter only single character (r,m)")
+            itmType = input("Enter item type (regular(r)/medical(m)): ")
+        
+        if itmType == 'r':
+            itmType = "regular"
+        else:
+            itmType = "medical"
+
+        itmDescription = input("Enter item description: ")
+        qty = input("Enter quanity of item required: ")
+
+        # demand table
+        tableName = "demand" + CampAdmin.thisYear
+        # query to insert the demanded item in demand table
+        query = "insert into " + tableName + " values('" + campId + "', '" +\
+             itmName + "', '" + itmType + "', '" + itmDescription + "', " + qty + ");"
+        # connect to all camp database (common/general database)
+        cur, conn = self.connect("all_camp_details")
+        cur.execute(query)      # make the demand (insert the demand in table)
+
+        if cur.rowcount == 1:
+            print("Request Successfully submitted.")
+        else:
+            print("There was an ERROR in submission of report !!")
+            print("Try again...")
+        print()
+
+        cur.close()
+        conn.close()
+
+
+    def updateSupplyData(self,campName : str):
+        ''' add/update the supply records in camp '''
+        os.system("cls")
+        # menu
+        print("1. Add a new item in records")
+        print("2. Update an already existing item")
+        print("0 to exit.")
+        wantTO = int(input("Choice: "))
+
+        if wantTO > 2 or wantTO < 1:
+            os.system("cls")
+            return
+        
+        # get and set catagory correctly
+        catagory = input("Enter supply type (regular(r)/medical(m)): ")
+        while catagory not in ('r','m'):
+            print("Error, wrong choice! Enter only one character (r/m)")
+            catagory = input("Enter supply type (regular(r)/medical(m)): ")
+        if catagory == 'r':
+            catagory = "regular"
+        else:
+            catagory = "medical"
+        # set tablename
+        tableName = catagory + "_supply_table" + CampAdmin.thisYear
+        query = ''
+
+        # if want to add new item
+        if wantTO == 1:
+            # get item details
+            campid = campName[4:]
+            itemName = input("Enter the name of item: ").lower()
+            while len(itemName) < 2:
+                itemName = input("Enter the name of item: ")
+            
+            itemType = input("Enter the type of item: ")
+            while itemType == '':
+                itemType = input("Enter the type of item: ")
+            
+            itemDescription = input("Enter item description: ")
+            while len(itemDescription) < 2:
+                print("Enter a valid item description")
+                itemDescription = input("Enter item description: ")
+            
+            quantity = input("Enter quanity: ")
+            while not quantity.isdigit():
+                print("Enter valid quantity (numeric)")
+                quantity = input("Enter quanity: ")
+            while int(quantity) < 0:
+                print("Error, quantity can't be in negative !! Try again...")
+                quantity = input("Enter quanity: ")
+
+            if catagory == "medical":
+                ageGroups = input("Which age groups it is applicable to (all/6-10/etc): ")
+
+            # query created according to catagory
+            if catagory == "medical":
+                query = "insert into " + tableName + " values('" + itemName + "', '" +\
+                    itemType + "', '" + itemDescription + "', '" + ageGroups + "', " + quantity + ");"
+            else:
+                query = "insert into " + tableName + " values('" + itemName + "', '" +\
+                    itemType + "', '" + itemDescription + "', " + quantity + ");"
+            # connect to camp database & execute query
+            cur, conn = self.connect(campName)
+            cur.execute(query)
+            print()
+
+            if cur.rowcount == 1:
+                print("Successfully added record")
+            else:
+                print("There was an ERROR in adding the record !! Try again.")
+            cur.close()
+            conn.close()
+
+        else:
+            cur, conn = self.connect(campName)
+
+            # first get all supply item names
+            query = "select item_name from " + tableName + ";"
+            cur.execute(query)
+            # print itemnames
+            allItems = cur.fetchall()
+            listOfItems = list()
+            for itm in allItems:
+                listOfItems.append(itm[0])
+            print(listOfItems)
+
+            itemName = input("\nEnter the itemName to update it's supply: ").lower()
+            
+            # if the name is not in supply item list
+            while itemName not in listOfItems:
+                print("Error, item does not exists in pre existing items!! Try again...")
+                itemName = input("\nEnter the itemName to update it's supply: ").lower()
+            qty = input("Enter updated quantity: ")
+
+            # create and execute the query 
+            query = "update " + tableName + " set qty = " + qty + " where item_name = '" + itemName + "';"
+            cur.execute(query)
+            print()
+
+            if cur.rowcount == 1:
+                print("Successfully updated record")
+            else:
+                print("There was an ERROR in updating the record !! Try again.")
+            cur.close()
+            conn.close()
+
+
+    def feedback(self, campName):
     # for each and everything in detail
-        pass
+        feedback = input("Enter feedback below\n")
+        cur, conn = self.connect("all_camp_details")
+        campid = campName[4:]
+
+        feedbackTable = "feedback" + CampAdmin.thisYear
+        query = "select campid from " + feedbackTable + ";"
+        cur.execute(query)
+        campNames = cur.fetchall()[0]
+        # print(campNames)
+        if campid not in campNames:
+            query = "insert into " + feedbackTable + " values('" + campid + "','" + feedback + "');"
+            cur.execute(query)
+        else:
+            query = "update " + feedbackTable + " set feedback = '" + feedback + "' where campid = '" + campid + "';"
+            cur.execute(query)
+        
+        if cur.rowcount == 1:
+            print("\nFeedback successfully submitted.\n")
+        else:
+            print("\nError, could not submit feedback.\n")
+        cur.close()
+        conn.close()
+
 
     def checkDonationStatus(self):
         pass
