@@ -93,17 +93,19 @@ def main():
                 # also a col containing LeftDate needs to be updated
                 print("4. Find vacancies in nearby camps")
                 
-                print("5. Request read access to supply data/resources of other camp")
+                print("5. Read resource availibility in other camp")
                 # need to create supply_dataYear table and a readOnlyview in each database
                 print("6. Request an emergency item/resource supply from other camp(s)")
                 # send a request, other side verify it, your database get increment in qty after recieving item by hand, their database get decrement in value by same (done manually (assigning))
-                print("7. Read new entries of the day in other camps")
+                print("7. Request supply from government")
+                print("8. Update Supply data")
+                print("9. Read new entries of the day in other camps")
                 # also allows search in today's new entries of other camps
                 # contains UniteProgram inside, so can unite the people who are found to their families
                 
-                print("8. Send Feedback to SysAdmin (to NDRF authorities)")
+                print("10. Send Feedback to SysAdmin (to NDRF authorities)")
                 # from general feedback to all types, including education of students, requirements, etc
-                print("9. Check donation status")
+                print("11. Check donation status")
                 print("0. Exit")
                 choice = int(input("Enter a choice: "))
 
@@ -114,18 +116,20 @@ def main():
                 elif choice == 3:
                     admin.updateDetails(campName)
                 elif choice == 4:
-                    admin.directFrom(campName)
-                elif choice == 5:
                     admin.findVacancies()
+                elif choice == 5:
+                    admin.readItemAvailability()
                 elif choice == 6:
-                    admin.requestReadSupply()
+                    admin.contactSupplyFromCamps()
                 elif choice == 7:
-                    admin.requestGetSupply()
+                    admin.requestSupplyFromMain(campName)
                 elif choice == 8:
-                    admin.readTodayAll()
+                    admin.updateSupplyData(campName)
                 elif choice == 9:
-                    admin.feedback()  # will have section-wise feedback
+                    admin.readTodayAll()
                 elif choice == 10:
+                    admin.feedback(campName)  # will have section-wise feedback
+                elif choice == 11:
                     admin.checkDonationStatus()
                 elif choice == 0:
                     print("Exiting...")
