@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------
-A camp contains: main_tableYEAR, injury_tableYEAR, regular_supply_table2021, medical_supply_table2021
+A camp contains: main_tableYEAR, injury_tableYEAR, regular_supply_table2021, medical_supply_table2021, my_camp_info
 --------------------------------------------------------------------------
 create table main_table2021(
 family_id varchar(20) not null, 
@@ -16,7 +16,6 @@ leftOn date,
 injury char(1) not null,
 primary key (family_id, member_no)
 );
-
 
 insert into main_table2021 values('FLY1001', 1, 'DemoName', 35, 'M','self','Narayanpur','near Hariram', 'Y', '2021-10-21', null, 'Y');
 insert into main_table2021 values('FLY1001', 2, 'Person2', 40, 'M','brother','Narayanpur','near Hariram', 'N', '2021-10-21', null, 'Y');
@@ -63,7 +62,7 @@ qty int not null
 );
 
 
-medicin_supply_tableYEAR
+medicine_supply_tableYEAR
 item_name : PCM 500 mg
 item_type : tab (,oint,gel, etc)
 item_description : used to relieve headache, fever, and pain in body
@@ -81,8 +80,30 @@ insert into medical_supply_table2021 values('PCM 500mg','tab','used to relieve h
 insert into medical_supply_table2021 values('Calcium Tab 500mg','tab','releive joint pain due to lack of calcium in bones','all',400);
 
 
+my_camp_info
+same structure as all_camp_detail but one more column : YEAR
+
+create table my_camp_info(
+campID varchar(20) not null,
+campName varchar(20) not null,
+state varchar(20) not null,
+district varchar(20) not null,
+city_or_village varchar(20) not null,
+coordinates varchar(50) not null,
+camp_admin varchar(20) not null,
+camp_admin_aadhar varchar(12) unique not null,
+email varchar(25) not null,
+mobile varchar(10) not null,
+total_camp_capacity int not null,
+capacity_full char(1) not null,
+month varchar(2) not null,
+year varchar(4) not null,
+primary key(month,year)
+);
+
+
 --------------------------------------------------------------------
-all_camp_details
+all_camp_details : campdetYEAR, support_membersYEAR feedbackYEAR, demandYEAR
 --------------------------------------------------------------------
 
 create table campdet2021(
@@ -116,3 +137,26 @@ insert into support_members2021 values(
 '27b4677', 'Lokesh','243567898567','email@mail.com','1234567890');
 insert into support_members2021 values(
 '27b4677', 'Pratap','243567432267','email@mail.com','1234567890');
+
+
+create table feedback2021(
+campId varchar(20) primary key references campdet2021(campId),
+feedback text not null
+);
+
+
+insert into feedback2021 values('27b4677','This is a feedback.');
+update feedback2021 set feedback = 'This is updated feedback.' where campid = '27b4677';
+
+
+create table demand2021(
+campId varchar(20) not null references campdet2021(campId),
+item_name varchar(40) not null,
+item_type varchar(10) not null,
+item_description varchar(100),
+qty integer not null
+);
+
+item_type: regular/medical
+
+insert into demand2021 values('27b4677', 'pcm 500 mg', 'medical', 'relieve from fever, headache',500);
