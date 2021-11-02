@@ -101,7 +101,22 @@ year varchar(4) not null,
 primary key(month,year)
 );
 
+#################################################
+a view: today_all (contains all people name, family members name, relation who has been added today)
+(this view is created at the time of camp registration/creation)
+# NOTE: at the time of camp registration all these above tables are created and required tables are filled too. So automate this.
+update the registerCamp() and deregister also if reqd.
 
+create view today_all as
+select family_id, member_no, name, age, gender, relation, vill_or_city, loc_in_vill_or_city, incamp 
+from main_table2021, current_date where joinedon = current_date;
+
+create view today_all as
+select family_id, member_no, name, age, gender, relation, vill_or_city, loc_in_vill_or_city, incamp 
+from main_tableYEAR, current_date where joinedon = current_date;
+
+The beauty of view is, create once and it is updated automatically as and when the table gets updated
+#################################################
 --------------------------------------------------------------------
 all_camp_details : campdetYEAR, support_membersYEAR feedbackYEAR, demandYEAR
 --------------------------------------------------------------------
