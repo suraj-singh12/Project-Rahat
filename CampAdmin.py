@@ -1,18 +1,23 @@
-# from _typeshed import Self
-from typing import ItemsView
 from config import config
 import datetime     # for current year
-import os
-
+import os           # for clearing screen
 from Database import Database
 
 class CampAdmin(Database):
     ''' -------- CampAdmin portal functions -------- '''
+# -------------------------------------------------------------------------------------------------
     total_person = 0            # this set by __set_class_info(campName)
     new_family_id = 'FLY1000'       # this is invalid, set correctly by __set_class_info(campName)
     usrType = "camp_admin"
     thisYear = str(datetime.datetime.now().year)
-
+# -------------------------------------------------------------------------------------------------
+    def __init__(self, identity, pswd):
+        self.identity = identity
+        if not self.validate(CampAdmin.usrType, self.identity, pswd):
+            print("Authentication Failed !")
+            exit(-1)
+        self.__set_class_info(identity)
+    
     def __set_class_info(self, campName: str):
         # connect to this camp
         cur, conn = self.connect(campName)
@@ -35,15 +40,8 @@ class CampAdmin(Database):
 
         cur.close()
         conn.close()
+# -------------------------------------------------------------------------------------------------
 
-
-    def __init__(self, identity, pswd):
-        self.identity = identity
-        if not self.validate(CampAdmin.usrType, self.identity, pswd):
-            print("Authentication Failed !")
-            exit(-1)
-        self.__set_class_info(identity)
-    
     def readThis(self, campName:str):
         in_pass = input("Enter your password again: ")
 
@@ -71,6 +69,7 @@ class CampAdmin(Database):
         else:
             print("Access denied, invalid password !")
 
+# -------------------------------------------------------------------------------------------------
 
     def __getInjuryRecords(self, familyId:str, memberNo:int):
         descr = input("Enter Injury Description: ")
@@ -98,6 +97,8 @@ class CampAdmin(Database):
         query = "INSERT INTO injury_table2021 values (" + query_data + ");"
         # print(query)
         return query
+
+# -------------------------------------------------------------------------------------------------
 
     # static variables
     vill_city = ''
@@ -170,6 +171,7 @@ class CampAdmin(Database):
         # print(query, query2)
         return query, query2
 
+# -------------------------------------------------------------------------------------------------
 
     def writeInto(self, campName:str): 
         """ Insert a record in database / camp """
@@ -203,9 +205,12 @@ class CampAdmin(Database):
             conn.close()
             print("Total rows affected {}".format(count))
 
-    def updateDetails(self, campName):
-    # CampAdmin.total_count += 1 
+# -------------------------------------------------------------------------------------------------
+
+    def updateDetails(self, campName): 
         pass
+
+# -------------------------------------------------------------------------------------------------
 
     def findVacancies(self):
         ''' find vacancies in other camps, and carry people there after informing the camp admin '''
@@ -262,6 +267,7 @@ class CampAdmin(Database):
                 print()
             print("--------------------------------------------------------------------------------------------------------------------------")
     
+# -------------------------------------------------------------------------------------------------
 
     def readItemAvailability(self):
         ''' find if an item is available in any camp [in a given district] '''
@@ -279,10 +285,7 @@ class CampAdmin(Database):
             itm_type = "medical"
         
         # get a list of all databases (camps, other default db)
-        cur, conn = self.connect()
-        db_list = self.listAllDatabases(cur) 
-        cur.close()
-        conn.close()
+        db_list = self.listAllDatabases() 
 
         os.system("cls")
         # print relevant header
@@ -331,6 +334,7 @@ class CampAdmin(Database):
                     
         return availCampList
             
+# -------------------------------------------------------------------------------------------------
 
     def contactSupplyFromCamps(self):
         ''' get the contact of admins of camps who have certain item available '''
@@ -357,11 +361,26 @@ class CampAdmin(Database):
             print("No camp in the entered district has the item you are searching for !")
             print("Kindly Try after some time or try other district")
 
+# -------------------------------------------------------------------------------------------------
 
     def readTodayAll(self):
-    # make a table containing all the TodayFound/Added in it (also they'd be added in their camps, that's obvious thing)
-        pass
+        ''' read all the entries of today in all camps '''
+        
+        os.system("cls")
+        allCamps = self.listAllDatabases()
 
+        for camp in allCamps:
+            if camp[0:4] == 'camp':
+                cur, conn = self.connect(camp)
+                query = "select * from today_all;";
+                cur.execute(query)
+
+                header = "(Family_ID, Member_No, Name, Age, Gender, Relation, Village\\City, location, inCamp)\n"
+                print(header)
+                for row in cur.fetchall():
+                    print(row)
+        print()
+# -------------------------------------------------------------------------------------------------
     def requestSupplyFromMain(self,campName):
         ''' send supply request to govt(sysAdmin) team '''
 
@@ -404,6 +423,7 @@ class CampAdmin(Database):
         cur.close()
         conn.close()
 
+# -------------------------------------------------------------------------------------------------
 
     def updateSupplyData(self,campName : str):
         ''' add/update the supply records in camp '''
@@ -511,6 +531,7 @@ class CampAdmin(Database):
             cur.close()
             conn.close()
 
+# -------------------------------------------------------------------------------------------------
 
     def feedback(self, campName):
     # for each and everything in detail
@@ -537,6 +558,8 @@ class CampAdmin(Database):
         cur.close()
         conn.close()
 
-
+# -------------------------------------------------------------------------------------------------
     def checkDonationStatus(self):
         pass
+
+# -------------------------------------------------------------------------------------------------

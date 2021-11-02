@@ -1,6 +1,7 @@
 from config import config
 
 import psycopg2
+# important to import and enable isolation_level_autocommot otherwise database creation fails
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
 class Database:
@@ -16,6 +17,7 @@ class Database:
             return True
         return False
 
+
     def connect(self, database=''):
         """ Connect to the PostgreSQL database server """
         conn = None
@@ -30,7 +32,7 @@ class Database:
             conn = psycopg2.connect(**params)
 
             conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
-            # enabled isolation_level_autocommit ; now databases can be created without issue
+            # enabled isolation_level_autocommit; now databases can be created without issue
             # print("Connected successfully.\n")
 
             # create a cursor
@@ -41,23 +43,21 @@ class Database:
             print(error)
 
 
-    def listAllDatabases(self, cur):
-        # list all databases
+    def listAllDatabases(self):
+        # connect to default database
+        cur, conn = self.connect()
+        # query to list all databases
         cur.execute("SELECT datname FROM pg_database;")
         db_list = list()
         for db in cur.fetchall():
             db_list.append(db[0])
+        cur.close()
+        conn.close()
         return db_list
 
     def isPresentCamp(self, database):
-        # connect to default database
-        cur, conn = self.connect()
         # list all databases present in system (i.e. all registered camps)
-        db_list = self.listAllDatabases(cur)
-        # close cursor and connection with default database
-        cur.close()
-        conn.close()
-
+        db_list = self.listAllDatabases()
         # check the presence of database in all databases
         if database in db_list:
             return True
