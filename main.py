@@ -49,6 +49,7 @@ def main():
             else:
                 print("Error!! wrong choice")
             
+            print()
             input("Enter a key to continue...")
             os.system("cls")
 
@@ -109,7 +110,6 @@ def main():
                 
                 # from general feedback to all types, including education of students, requirements, etc
                 print("10. Send Feedback to SysAdmin (to NDRF authorities)")
-                print("11. Check donation status")
                 print("0. Exit")
                 choice = int(input("Enter a choice: "))
 
@@ -133,14 +133,13 @@ def main():
                     admin.readTodayAll()
                 elif choice == 10:
                     admin.feedback(campName)
-                elif choice == 11:
-                    admin.checkDonationStatus()
                 elif choice == 0:
                     print("Exiting...")
                     exit(0)
                 else:
                     print("Error! Invalid choice.")
                 
+                print()
                 input("Enter a key to continue...")
                 os.system("cls")
 
