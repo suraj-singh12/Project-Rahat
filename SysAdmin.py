@@ -1,3 +1,4 @@
+from os import remove
 from Database import Database
 import datetime
 
@@ -7,13 +8,15 @@ class SysAdmin(Database):
     usrType = "sys_admin"
     identity = "sysadmin"
     thisYear = str(datetime.datetime.now().year)
-
+# -----------------------------------------------------------------------------------------------------------------------------
     def __init__(self, pswd):
         if not self.validate(SysAdmin.usrType, SysAdmin.identity, pswd):
             print("Authentication Failed !")
             exit(-1)
+# -----------------------------------------------------------------------------------------------------------------------------
 
     def __setCampDetails(self, campName):
+        ''' sets the camp details in all_camp_details database '''
         print("Enter the below information correctly: ")
         campId = campName[4:]
         # campName we already have
@@ -24,6 +27,9 @@ class SysAdmin(Database):
         district = input("District: ")
         cityOrVillage = input("city/village name: ")
         coord = input("Coordinates: ")
+        while len(coord) > 50:
+            print("Error, Coordinates length exceeds max length! Try again")
+            coord = input("Coordinates: ")
         
         print("=> Enter Camp Admin Details: ")
         campAdminName = input("Name: ")
@@ -43,6 +49,7 @@ class SysAdmin(Database):
         capacityFull = 'N'
 
         cur, conn = self.connect("all_camp_details")
+        # insert in main table (campdetYEAR)
         tableName = "campdet" + SysAdmin.thisYear
 
         query_data = "'" + campId + "', '" + campName + "', '" + state + "', '" + district + "', '" + cityOrVillage + "', '" \
@@ -51,28 +58,62 @@ class SysAdmin(Database):
 
         query= "INSERT INTO " + tableName + " values (" + query_data +  ");"
         cur.execute(query)
+
+        # get support member details here 
+        print("Enter the support member details: ")
+        while(True):
+            memberName = input("Enter member name: ")
+            memberAadhar = input("Enter member Aadhar Number: ")
+            while memberAadhar.isdigit() != True or len(memberAadhar) != 12:
+                print("Error, invalid aadhar number. Enter a 12 digit aadhar.")
+                memberAadhar = input("Enter member Aadhar Number: ")
+            memberEmail = input("Enter member Email: ")
+            memberMobile = input("Enter member Mobile Number: ")
+            while memberAadhar.isdigit() != True or len(memberMobile) != 10:
+                print("Error, invalid mobile number. Enter a 10 digit number.")
+                memberMobile = input("Enter member Mobile Number: ")
+
+            supportTableName = "support_members" + SysAdmin.thisYear
+            insertInSupportTable = "insert into " + supportTableName + " values('" + \
+                campId + "', '" + memberName + "', '" + memberAadhar + "', '" + email + "', '" + memberMobile + "');"
+            cur.execute(insertInSupportTable)
+
+            choice = input("More members?(y/n) ").lower()
+            if choice != 'y':
+                break
+
         print("Total rows affected = {}".format(cur.rowcount))
         cur.close()
         conn.close()
+        return query_data
+
+# -----------------------------------------------------------------------------------------------------------------------------
 
     def __removeCampDetails(self, campName):
         cur,conn = self.connect("all_camp_details")
-        tableName = "campdet" + SysAdmin.thisYear
+        # remove details from support table
+        supportTableName = "support_members" + SysAdmin.thisYear
+        removeFromSupport = "Delete from " + supportTableName + " where campid = '" + campName[4:] + "';"
+        cur.execute(removeFromSupport)
 
-        query = "Delete from " + tableName + " where campId = '" + campName[4:] + "';"
-        cur.execute(query)
+        # remove details from main table
+        tableName = "campdet" + SysAdmin.thisYear
+        removeFromCampdet = "Delete from " + tableName + " where campId = '" + campName[4:] + "';"
+        cur.execute(removeFromCampdet)
+
         print("Total rows affected = {}".format(cur.rowcount))
         cur.close()
         conn.close()
+# -----------------------------------------------------------------------------------------------------------------------------
 
     def registerCamp(self):
-        """ in technical terms: Creates a new database for a new camp """
+        """ in technical terms: Creates a new database for a new camp, fills it will all the required tables, sets this camp details in all_camp_details """
         
         inp = input("Enter camp ID: ").lower()
         campName = "camp" + inp
         
         if not self.isPresentCamp(campName):
-            self.__setCampDetails(campName)
+            query_data = self.__setCampDetails(campName)
             
             # connect to default database
             cur,conn = self.connect()
@@ -80,14 +121,95 @@ class SysAdmin(Database):
             # create database campName
             createDatabase = "CREATE DATABASE " + campName + ";"
             cur.execute(createDatabase)
+            cur.close()
+            conn.close()
+
+            # connect with new database (camp)
+            cur, conn = self.connect(campName)
             
+            # fill the camp with required tables
+            mainTableName = "main_table" + SysAdmin.thisYear
+            createMainTable = "create table " + mainTableName + """(
+                                family_id varchar(20) not null, 
+                                member_no int not null,
+                                name varchar(40) not null,
+                                age int not null,
+                                gender char(1) not null,
+                                relation varchar(10) not null,
+                                vill_or_city varchar(50) not null,
+                                loc_in_vill_or_city varchar(70) not null,
+                                inCamp char(1) not null,
+                                joinedOn date,
+                                leftOn date,
+                                injury char(1) not null,
+                                primary key (family_id, member_no)
+                                );"""
+            cur.execute(createMainTable)
+
+            injuryTableName = "injury_table" + SysAdmin.thisYear
+            createInjuryTable = "create table " + injuryTableName + """(
+                                family_id varchar(20) not null,
+                                member_no int not null,
+                                injury_description varchar(200) not null,
+                                injury_level char(1) not null,
+                                recovery_initiated char(1) not null,
+                                recovery_percent int not null,
+                                foreign key(family_id, member_no) references main_table2021
+                                );"""
+            cur.execute(createInjuryTable)
+
+            regularSupplyTableName = "regular_supply_table" + SysAdmin.thisYear
+            createRegularSupplyTable = "create table "+ regularSupplyTableName +"""(
+                                        item_name varchar(50) not null primary key,
+                                        item_type varchar(20) not null,
+                                        description varchar(100) not null,
+                                        qty int not null
+                                        );"""
+            cur.execute(createRegularSupplyTable)
+
+            medicalSupplyTableName = "medical_supply_table" + SysAdmin.thisYear
+            createMedicalSupplyTable = "create table " + medicalSupplyTableName + """(
+                                        item_name varchar(50) not null primary key,
+                                        item_type varchar(20) not null,
+                                        description varchar(100) not null,
+                                        age_groups varchar(10) not null,
+                                        qty int not null
+                                        );"""
+            cur.execute(createMedicalSupplyTable)
+
+            myCampInfoTableName = "my_camp_info"
+            createMyCampInfoTable = "create table " + myCampInfoTableName + """(
+                                        campID varchar(20) not null,
+                                        campName varchar(20) not null,
+                                        state varchar(20) not null,
+                                        district varchar(20) not null,
+                                        city_or_village varchar(20) not null,
+                                        coordinates varchar(50) not null,
+                                        camp_admin varchar(20) not null,
+                                        camp_admin_aadhar varchar(12) unique not null,
+                                        email varchar(25) not null,
+                                        mobile varchar(10) not null,
+                                        total_camp_capacity int not null,
+                                        capacity_full char(1) not null,
+                                        month varchar(2) not null,
+                                        year varchar(4) not null,
+                                        primary key(month,year)
+                                        );"""
+            cur.execute(createMyCampInfoTable)
+
+            TodayAll = "today_all"              # a view on main_tableYEAR
+            createViewTodayAll = "create view " + TodayAll + " as " + \
+                                    "select family_id, member_no, name, age, gender, relation, vill_or_city, loc_in_vill_or_city, incamp \
+                                    from " + mainTableName + ", current_date where joinedon = current_date;"
+            cur.execute(createViewTodayAll)
+
             print("Camp " + campName + " successfully registered.")
             cur.close()
             conn.close()
         else:
             print("Camp " + campName + " already exists!!")
         
-
+# -----------------------------------------------------------------------------------------------------------------------------
     def deRegister(self):
         """ in technical terms: drop a database"""
         
@@ -105,12 +227,12 @@ class SysAdmin(Database):
             if cur.rowcount == 0:
                 print("No relation found in " + campName)
             else:
-                print("All these relations exist in " + campName + " :")
+                print("\nAll these relations exist in " + campName + " :")
                 for table in cur.fetchall():
-                    print(table[0], end=' ')
+                    print(table[2], end=' ')
             
-            print("\n[Note: This action is irreversible and you will lose all the data of this camp]")
-            consent = input("Are you sure you want to de-register this camp?(y/n): ")
+            print("\n\n[Note: This action is irreversible and you will lose all the data of this camp]")
+            consent = input("\nAre you sure you want to de-register this camp?(y/n): ")
 
             if consent.lower() == 'y':
                 # close connection with current database
@@ -132,7 +254,7 @@ class SysAdmin(Database):
         else:
             print("Error! There is no camp as " + campName)
 
-
+# -----------------------------------------------------------------------------------------------------------------------------
     def readCamp(self):
         """ Read data of any camp by campID """
 
@@ -175,7 +297,7 @@ class SysAdmin(Database):
             conn.close()
         else:
             print("Error! " + campName + " is not a registered camp")
-
+# -----------------------------------------------------------------------------------------------------------------------------
 
     def listAllRegCampsInfo(self):
         """ Lists out the information of all registered camps by specific year """
@@ -269,3 +391,4 @@ class SysAdmin(Database):
         
         cur.close()
         conn.close()
+# -----------------------------------------------------------------------------------------------------------------------------
