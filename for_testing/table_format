@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------
-A camp contains: main_tableYEAR, injury_tableYEAR, regular_supply_table2021, medical_supply_table2021, my_camp_info
+A camp contains: main_tableYEAR, injury_tableYEAR, regular_supply_table2021, medical_supply_table2021, my_camp_info, today_all
 --------------------------------------------------------------------------
 create table main_table2021(
 family_id varchar(20) not null, 
@@ -84,8 +84,8 @@ my_camp_info
 same structure as all_camp_detail but one more column : YEAR
 
 create table my_camp_info(
-campID varchar(20) not null,
-campName varchar(20) not null,
+camp_id varchar(20) not null,
+camp_name varchar(20) not null,
 state varchar(20) not null,
 district varchar(20) not null,
 city_or_village varchar(20) not null,
@@ -100,30 +100,31 @@ month varchar(2) not null,
 year varchar(4) not null,
 primary key(month,year)
 );
+insert into my_camp_info values('27b4677','camp27b4677','Assam','Lakhimpur','Narayanpur','26.950841, 93.859420','Narayan','123456789876','example@main.com','1234567890', 400,'N','10','2021');
 
-#################################################
+
+
 a view: today_all (contains all people name, family members name, relation who has been added today)
 (this view is created at the time of camp registration/creation)
-# NOTE: at the time of camp registration all these above tables are created and required tables are filled too. So automate this.
-update the registerCamp() and deregister also if reqd.
 
 create view today_all as
-select family_id, member_no, name, age, gender, relation, vill_or_city, loc_in_vill_or_city, incamp 
+select family_id, member_no, name, age, gender, relation, vill_or_city, loc_in_vill_or_city, incamp
 from main_table2021, current_date where joinedon = current_date;
 
 create view today_all as
-select family_id, member_no, name, age, gender, relation, vill_or_city, loc_in_vill_or_city, incamp 
+select family_id, member_no, name, age, gender, relation, vill_or_city, loc_in_vill_or_city, incamp
 from main_tableYEAR, current_date where joinedon = current_date;
 
 The beauty of view is, create once and it is updated automatically as and when the table gets updated
-#################################################
+
+
 --------------------------------------------------------------------
-all_camp_details : campdetYEAR, support_membersYEAR feedbackYEAR, demandYEAR
+all_camp_details : campdetYEAR, support_membersYEAR, feedbackYEAR, demandYEAR
 --------------------------------------------------------------------
 
 create table campdet2021(
-campID varchar(20) primary key,
-campName varchar(20) not null,
+camp_id varchar(20) primary key,
+camp_name varchar(20) not null,
 state varchar(20) not null,
 district varchar(20) not null,
 city_or_village varchar(20) not null,
@@ -140,12 +141,12 @@ insert into campdet2021 values('27b4677','camp27b4677','Assam','Lakhimpur','Nara
 
 
 create table support_members2021(
-campId varchar(20) not null,
+camp_id varchar(20) not null,
 Support_member varchar(20) not null,
 member_aadhar varchar(12) unique not null,
 email varchar(25) not null,
 mobile varchar(10) not null,
-foreign key (campId) references campdet2021(campId)
+foreign key (camp_id) references campdet2021(camp_id)
 );
 
 insert into support_members2021 values(
@@ -155,17 +156,17 @@ insert into support_members2021 values(
 
 
 create table feedback2021(
-campId varchar(20) primary key references campdet2021(campId),
+camp_id varchar(20) primary key references campdet2021(camp_id),
 feedback text not null
 );
 
 
 insert into feedback2021 values('27b4677','This is a feedback.');
-update feedback2021 set feedback = 'This is updated feedback.' where campid = '27b4677';
+update feedback2021 set feedback = 'This is updated feedback.' where camp_id = '27b4677';
 
 
 create table demand2021(
-campId varchar(20) not null references campdet2021(campId),
+camp_id varchar(20) not null references campdet2021(camp_id),
 item_name varchar(40) not null,
 item_type varchar(10) not null,
 item_description varchar(100),
