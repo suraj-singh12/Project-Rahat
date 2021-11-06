@@ -1,24 +1,27 @@
 from config import config
 
 import psycopg2
-# important to import and enable isolation_level_autocommot otherwise database creation fails
+# important to import and enable isolation_level_autocommit otherwise database creation fails
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
+
 class Database:
-    def validate(self, usrType, identity, pswd):
-        ''' used to validate password;    usrType: sys_admin/camp_admin, identity: campName/"sysadmin"  pswd: password '''
-        
+    @staticmethod
+    def validate(usrType, identity, pswd):
+        """ used to validate password;
+        usrType: sys_admin/camp_admin, identity: campName/"sysadmin"  pswd: password """
+
         # read passwords file (this file is on server)
-        params = config("passwords.ini",usrType)
+        params = config("passwords.ini", usrType)
         # fetch password of given identity
         ac_pass = params.get(identity)
 
-        if ac_pass is not None and  pswd == ac_pass:
+        if ac_pass is not None and pswd == ac_pass:
             return True
         return False
 
-
-    def connect(self, database=''):
+    @staticmethod
+    def connect(database=''):
         """ Connect to the PostgreSQL database server """
         conn = None
         try:
@@ -27,7 +30,7 @@ class Database:
 
             # connect to the PostgreSQL server
             # if a database is specified during connection, then connect to that otherwise default
-            if database != '':      
+            if database != '':
                 params['database'] = database
             conn = psycopg2.connect(**params)
 
@@ -37,11 +40,10 @@ class Database:
 
             # create a cursor
             cur = conn.cursor()
-            return cur,conn
+            return cur, conn
 
         except (Exception, psycopg2.DatabaseError) as error:
             print(error)
-
 
     def listAllDatabases(self):
         # connect to default database
