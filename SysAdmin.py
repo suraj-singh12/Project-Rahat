@@ -97,12 +97,12 @@ class SysAdmin(Database):
         cur, conn = self.connect("all_camp_details")
         # remove details from support table
         supportTableName = "support_members" + SysAdmin.thisYear
-        removeFromSupport = "Delete from " + supportTableName + " where campid = '" + campName[4:] + "';"
+        removeFromSupport = "Delete from " + supportTableName + " where camp_id = '" + campName[4:] + "';"
         cur.execute(removeFromSupport)
 
         # remove details from main table
         tableName = "campdet" + SysAdmin.thisYear
-        removeFromCampdet = "Delete from " + tableName + " where campId = '" + campName[4:] + "';"
+        removeFromCampdet = "Delete from " + tableName + " where camp_id = '" + campName[4:] + "';"
         cur.execute(removeFromCampdet)
 
         print("Total rows affected = {}".format(cur.rowcount))
@@ -185,8 +185,8 @@ class SysAdmin(Database):
 
             myCampInfoTableName = "my_camp_info"
             createMyCampInfoTable = "create table " + myCampInfoTableName + """(
-                                        campID varchar(20) not null,
-                                        campName varchar(20) not null,
+                                        camp_id varchar(20) not null,
+                                        camp_name varchar(20) not null,
                                         state varchar(20) not null,
                                         district varchar(20) not null,
                                         city_or_village varchar(20) not null,
@@ -202,7 +202,8 @@ class SysAdmin(Database):
                                         primary key(month,year)
                                         );"""
             cur.execute(createMyCampInfoTable)
-            # fill my camp info using query_data variable
+            insertInMyCampInfoTable = "INSERT INTO " + myCampInfoTableName + " values (" + query_data + ");"
+            cur.execute(insertInMyCampInfoTable)
 
             TodayAll = "today_all"  # a view on main_tableYEAR
             createViewTodayAll = "create view " + TodayAll + " as " + \
@@ -338,7 +339,7 @@ class SysAdmin(Database):
 
         elif choice == 2:
             print("Details of all camps registered in year 2021: ")
-            header = ["campId", "campName", "state", "district", "city_or_village", "coordinates", "Admin",
+            header = ["camp_id", "camp_name", "state", "district", "city_or_village", "coordinates", "Admin",
                       "Admin_Aadhar", "email", "phone", "Total Capacity", "Capacity Full?"]
             for item in header:
                 print(item, end='\t')
@@ -368,7 +369,7 @@ class SysAdmin(Database):
                 """ print the details of the camp with details of support members too """
 
                 print()
-                header = ["campId", "campName", "state", "district", "city_or_village", "coordinates", "Admin",
+                header = ["camp_id", "camp_name", "state", "district", "city_or_village", "coordinates", "Admin",
                           "Admin_Aadhar", "email", "phone", "Total Capacity", "Capacity Full?"]
                 for item in header:
                     print(item, end='\t')
@@ -376,7 +377,7 @@ class SysAdmin(Database):
 
                 idd = myCamp[4:]
                 # find details of current camp
-                cur.execute("select * from " + tableName + " where campId = '" + idd + "' ;")
+                cur.execute("select * from " + tableName + " where camp_id = '" + idd + "' ;")
                 # print details of this camp
                 for row in cur.fetchall():
                     for item in row:
@@ -391,7 +392,7 @@ class SysAdmin(Database):
                     print(item, end="\t")
                 print()
 
-                cur.execute("select * from support_members" + SysAdmin.thisYear + " where campId = '" + idd + "';")
+                cur.execute("select * from support_members" + SysAdmin.thisYear + " where camp_id = '" + idd + "';")
                 for row in cur.fetchall():
                     for item in row[1:]:
                         print(item, end='\t')

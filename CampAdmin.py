@@ -357,9 +357,9 @@ class CampAdmin(Database):
                 campName = input("Enter the campName from above list of camps: ")
 
             # find current year admin's info
-            query = "select campid, camp_admin, mobile, email from my_camp_info where year = '" \
+            query = "select camp_id, camp_admin, mobile, email from my_camp_info where year = '" \
                     + CampAdmin.thisYear + "';"
-            header = "(CampId      campAdmin     Mobile         Email)"
+            header = "(Camp_id      campAdmin     Mobile         Email)"
             print(header)
 
             cur, conn = self.connect(campName)
@@ -551,7 +551,7 @@ class CampAdmin(Database):
         campid = campName[4:]
 
         feedbackTable = "feedback" + CampAdmin.thisYear
-        query = "select campid from " + feedbackTable + ";"
+        query = "select camp_id from " + feedbackTable + ";"
         cur.execute(query)
         campNames = cur.fetchall()[0]
         # print(campNames)
@@ -559,7 +559,7 @@ class CampAdmin(Database):
             query = "insert into " + feedbackTable + " values('" + campid + "','" + feedback + "');"
             cur.execute(query)
         else:
-            query = "update " + feedbackTable + " set feedback = '" + feedback + "' where campid = '" + campid + "';"
+            query = "update " + feedbackTable + " set feedback = '" + feedback + "' where camp_id = '" + campid + "';"
             cur.execute(query)
 
         if cur.rowcount == 1:
