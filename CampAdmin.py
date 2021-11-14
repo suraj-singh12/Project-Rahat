@@ -214,7 +214,106 @@ class CampAdmin(Database):
     # -------------------------------------------------------------------------------------------------
 
     def updateDetails(self, campName):
-        pass
+        """ update details of a person """
+
+        # connect to camp's database
+        cur, conn = self.connect(campName)
+        os.system("cls")
+
+        # ------------------- Menu -------------------
+        print("1. Update injury status of person in camp")
+        print("2. Update leftOn date for a person who is leaving the camp")
+        cat = input("Which category to update?(1/2) ")
+        while cat not in ('1', '2'):
+            print("\n\nEnter a valid choice")
+            cat = input("Which category to update?(1/2) ")
+        # ------------------- ------------------- -----
+
+        # get basic input to identify the person
+        familyId = input("\nEnter family ID: ")
+        while familyId == '':
+            familyId = input("\nEnter family ID: ")
+        memberNo = input("Enter member no: ")
+        while memberNo == '':
+            memberNo = input("Enter member no: ")
+        # table names
+        mainTable = "main_table" + CampAdmin.thisYear
+        injuryTable = "injury_table" + CampAdmin.thisYear
+
+        # ------------------- Menu functions -------------------
+        if cat == '1':
+            # first find whether the person recognised by (familyId, memberNo) is having injury or not
+            query = "select name from " + mainTable + \
+                    " where family_id='" + familyId + "' and member_no=" + memberNo + \
+                    " and injury='Y';"
+            cur.execute(query)
+
+            # if no injury then return
+            if cur.rowcount == 0:
+                print("Error!, can't set level as injury is set to NO for the person.")
+                return
+
+            # if injury is there, then print the person name
+            os.system("cls")
+            print("Found this record -\n")
+            for row in cur.fetchall():
+                print(row)
+            print()
+
+            # ------------------- get injury details -------------------
+            print("Injury levels: Low(L), Normal(N), High(H), Critical(C)")
+            injuryLevel = input("Enter injury level: (L/N/H/C): ").upper()
+            while injuryLevel not in ('L', 'N', 'H', 'C'):
+                print("Incorrect input, try again!")
+                injuryLevel = input("Enter injury level: (L/N/H/C): ").upper()
+
+            recoveryPercentage = input("Enter recovery percentage: ")
+            while (not recoveryPercentage.isdigit()) or int(recoveryPercentage) > 100 or int(recoveryPercentage) < 0:
+                print("Invalid input, Enter a value in [0,100] range")
+                recoveryPercentage = input("Enter recovery percentage: ")
+            # ------------------- ------------------- -------------------
+
+            # update the database with new details
+            query = "update " + injuryTable + \
+                " set injury_level='" + injuryLevel + "', " + \
+                "recovery_initiated='Y', recovery_percent=" + recoveryPercentage + " " + \
+                "where family_id='" + familyId + "' and member_no=" + memberNo + ";"
+
+            cur.execute(query)
+            print("Total rows affected: {}".format(cur.rowcount))
+            # ------------------- END -------------------
+
+        # ------------------- if the cat = '2' (i.e. choice category = 2) -------------------
+        else:
+            query = "select name, joinedon, lefton from " + mainTable + " where family_id='" + familyId + \
+                "' and member_no=" + memberNo + " and joinedon is not null and lefton is null;"
+            cur.execute(query)
+
+            # if no record found then return
+            if cur.rowcount == 0:
+                print("Error! The person is either not in camp or has already left")
+                print("Exiting...")
+                return
+
+            # else proceed
+            print("Matching records: ")
+            for row in cur.fetchall():
+                print(row)
+
+            consent = input("Proceed?(y/n) ").lower()
+
+            if consent == 'y':
+                # get today's date
+                leavingDate = str(datetime.datetime.now())[0:10]
+
+                updateQuery = "update " + mainTable + " set lefton ='" + leavingDate + "'" + \
+                    " where family_id='" + familyId + "' and member_no=" + memberNo + ";"
+                cur.execute(updateQuery)
+
+                if cur.rowcount == 1:
+                    print("Success !")
+                else:
+                    print("An error occurred! please try again")
 
     # -------------------------------------------------------------------------------------------------
 
@@ -224,7 +323,7 @@ class CampAdmin(Database):
 
         cur, conn = self.connect("all_camp_details")
         tableName = "campdet" + CampAdmin.thisYear
-        query = "select campname, camp_admin, email, phone," + \
+        query = "select camp_name, camp_admin, email, phone," + \
                 "district, city_or_village, total_camp_capacity from " + tableName + \
                 " where capacity_full = 'N' and district = '" + district + "';"
         cur.execute(query)
