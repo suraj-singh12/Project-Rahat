@@ -46,31 +46,39 @@ class CampAdmin(Database):
     # -------------------------------------------------------------------------------------------------
 
     def readThis(self, campName: str):
-        in_pass = input("Enter your password again: ")
+        # connect to camp's database
+        cur, conn = self.connect(campName)
 
-        # read passwords file (this file is on server)
-        params = config("passwords.ini", "camp_admin")
-        ac_pass = params.get(campName)
+        mainTable = "main_table" + CampAdmin.thisYear
+        injuryTable = "injury_table" + CampAdmin.thisYear
 
-        # password is not null and matches then proceed to connect 
-        if ac_pass is not None and ac_pass == in_pass:
-            # connect to camp's database
-            cur, conn = self.connect(campName)
+        os.system("cls")
+        cur.execute("SELECT * from " + mainTable + ";")
+        mainTableRows = cur.fetchall()
+        cur.execute("SELECT * from " + injuryTable + ";")
+        injuryTableRows = cur.fetchall()
 
-            relationName = "main_table" + CampAdmin.thisYear
-
-            os.system("cls")
-            # print details of people in camp
-            cur.execute("SELECT * from " + relationName + ";")
-            if cur.rowcount == 0:
-                print("No records found!")
-            else:
-                for row in cur.fetchall():
-                    print(row)
-            cur.close()
-            conn.close()
+        # print details of people in camp
+        if cur.rowcount == 0:
+            print("No records found!")
         else:
-            print("Access denied, invalid password !")
+            total_length = len(mainTableRows)
+            length1 = 0
+            length2 = 0
+
+            while length1 < total_length:
+                print("------------------------"*5)
+                print("BASIC  details: ", end='')
+                print(mainTableRows[length1])
+                if mainTableRows[length1][8] == 'Y':
+                    print("INJURY details: ", end='')
+                    print(injuryTableRows[length2])
+                    length2 += 1
+                length1 += 1
+                print("------------------------"*5)
+                print()
+        cur.close()
+        conn.close()
 
     # -------------------------------------------------------------------------------------------------
 
@@ -209,7 +217,12 @@ class CampAdmin(Database):
                     count += 1
             cur.close()
             conn.close()
-            print("Total rows affected {}".format(count))
+            print("Total rows affected {}\n".format(count))
+
+            print("Provide below familyId card to the person1 of family")
+            print("---------------"*5)
+            print("FamilyID: " + CampAdmin.new_family_id)
+            print("---------------" * 5)
 
     # -------------------------------------------------------------------------------------------------
 
