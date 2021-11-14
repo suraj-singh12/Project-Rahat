@@ -80,8 +80,7 @@ class MainWindow(QMainWindow):
 
     def about(self):
         msg = "\nTestingBase Creator for Project-Rahat\t\n\nCreated By: Suraj Singh\n"
-        abt = QMessageBox.about(self, "About", msg)
-
+        QMessageBox.about(self, "About", msg)
 
     def create_structures(self, s):
         msg = "This will erase any previous testing base. Are you sure you want to proceed?"
@@ -91,7 +90,7 @@ class MainWindow(QMainWindow):
             self.clean_first()
             code = self.createTestDatabases()
             if code == 0:
-                QMessageBox.information(self,"Information", "Successfully created the structures.")
+                QMessageBox.information(self, "Information", "Successfully created the structures.")
                 self.step1 = "done"
             else:
                 QMessageBox.critical(self, "Error", "Error, could not create the structures! Try again.")
@@ -136,7 +135,8 @@ class MainWindow(QMainWindow):
             self.response = QMessageBox.information(self, "Information", msg)
 
     # do-er functions
-    def check_connection(self) -> int:
+    @staticmethod
+    def check_connection() -> int:
         dbase = Database()
         try:
             cur, conn = dbase.connect()
@@ -153,14 +153,17 @@ class MainWindow(QMainWindow):
             return -1
         return 0
 
-    def clean_first(self):
+    @staticmethod
+    def clean_first():
         dbase = Database()
         cur, conn = dbase.connect()
         cur.execute("DROP database if exists camp27b4677;")
         cur.execute("Drop database if exists all_camp_details;")
+        cur.execute("Drop database if exists  testingbase")
         print("Cleaned !")
 
-    def createTestDatabases(self) -> int:
+    @staticmethod
+    def createTestDatabases() -> int:
         dbase = Database()
         log = open("logfile.log", "a")
         cur, conn = dbase.connect()
@@ -177,7 +180,8 @@ class MainWindow(QMainWindow):
         log.close()
         return 0
 
-    def populateTestDatabases(self) -> int:
+    @staticmethod
+    def populateTestDatabases() -> int:
         dbase = Database()
         log = open("logfile.log", "a")
         base_db = "all_camp_details"
@@ -329,7 +333,8 @@ class MainWindow(QMainWindow):
         log.close()
         return 0
 
-    def populateTestTables(self) -> int:
+    @staticmethod
+    def populateTestTables() -> int:
         dbase = Database()
         log = open("logfile.log", "a")
         log.write("\nInserting values in [all_camp_details]: \n\n")
@@ -376,7 +381,7 @@ class MainWindow(QMainWindow):
         log.write("into=> main_table2021\n")
         inMainTable = "insert into main_table2021 values(" + \
                       "'FLY1001', 2, 'Person2', 40, 'M','brother','Narayanpur'," + \
-                      "'near Hariram', 'N', '2021-10-21', null, 'Y');"
+                      "'near Hariram', 'N', null, null, '-');"
         cur.execute(inMainTable)
         log.write("into=> main_table2021\n")
         inMainTable = "insert into main_table2021 values(" + \
