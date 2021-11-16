@@ -74,9 +74,9 @@ class Portal(QMainWindow, Ui_mainWindow):
             admin = SysAdmin(pswd)
             print("reached admin object created")
             # if the password is correct, program will proceed else it exits at this point
-            # self.win = SysAdminWindow()
-            # self.win.showMaximized()
-            # self.close()
+            self.win = SysAdminWindow()
+            self.win.showMaximized()
+            self.close()
 
 
 
