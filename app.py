@@ -45,6 +45,10 @@ class Portal(QMainWindow, Ui_mainWindow):
         self.setupUi(self)
         self.pushButton.setEnabled(False)
 
+        # now Connect and Reset button can be triggered by Enter key also
+        self.pushButton.setAutoDefault(True)
+        self.pushButton_2.setAutoDefault(True)
+
         self.lineEdit.setEnabled(False)
         self.lineEdit_2.setEnabled(False)
         self.show()
