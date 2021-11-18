@@ -1,5 +1,24 @@
+import GetMemberDetails_UI
 from Database import Database
 import datetime
+import GetCampDetails_UI
+from PyQt5 import QtWidgets
+
+
+class GetDetails(QtWidgets.QWidget, GetCampDetails_UI.Ui_Dialog):
+    def __init__(self):
+        super(GetDetails, self).__init__()
+        self.setupUi(self)
+        self.pushButton.setAutoDefault(True)
+        self.pushButton_2.setAutoDefault(True)
+
+
+class GetMemDetails(QtWidgets.QWidget, GetMemberDetails_UI.Ui_Dialog):
+    def __init__(self):
+        super(GetMemDetails, self).__init__()
+        self.setupUi(self)
+        self.pushButton.setAutoDefault(True)
+        self.pushButton_2.setAutoDefault(True)
 
 
 class SysAdmin(Database):
@@ -17,38 +36,24 @@ class SysAdmin(Database):
 
     # -----------------------------------------------------------------------------------------------------------------------------
 
-    def __setCampDetails(self, campName):
+    def __setCampDetails(self, campName, camp_data, member_data):
         """ sets the camp details in all_camp_details database """
         print("Enter the below information correctly: ")
         campId = campName[4:]
-        # campName we already have
 
-        print("=> Enter Location Details: ")
-        state = input("State: ")
-        # check method will be installed later
-        district = input("District: ")
-        cityOrVillage = input("city/village name: ")
-        coord = input("Coordinates: ")
-        while len(coord) > 50:
-            print("Error, Coordinates length exceeds max length! Try again")
-            coord = input("Coordinates: ")
+        state = camp_data[0]
+        district = camp_data[1]
+        cityOrVillage = camp_data[2]
+        coord = camp_data[3]
 
-        print("=> Enter Camp Admin Details: ")
-        campAdminName = input("Name: ")
-        campAdminAadhar = input("Aadhar: ")
-        while len(campAdminAadhar) != 12:
-            print("Error, invalid Aadhar number. Try again")
-            campAdminAadhar = input("Aadhar: ")
-
-        email = input("Email: ")
-        phone = input("Phone Number: ")
-        while len(phone) != 10:
-            print("Error, invalid phone number. Enter 10 digit valid phone number")
-            phone = input("Phone Number: ")
-
-        print("=> Camp Related")
-        totalCampCapacity = input("Total capacity of camp (in numbers): ")
+        campAdminName = camp_data[4]
+        campAdminAadhar = camp_data[5]
+        email = camp_data[6]
+        phone = camp_data[7]
+        totalCampCapacity = camp_data[9]
         capacityFull = 'N'
+
+        print(camp_data)
 
         cur, conn = self.connect("all_camp_details")
         # insert in main table (campdetYEAR)
@@ -58,33 +63,27 @@ class SysAdmin(Database):
                      cityOrVillage + "', '" + coord + "', '" + campAdminName + "', '" + \
                      campAdminAadhar + "', '" + email + "', '" + phone + "', " + totalCampCapacity + \
                      ", '" + capacityFull + "'"
+        print(query_data)
 
         query = "INSERT INTO " + tableName + " values (" + query_data + ");"
         cur.execute(query)
 
-        # get support member details here 
-        print("Enter the support member details: ")
-        while True:
-            memberName = input("Enter member name: ")
-            memberAadhar = input("Enter member Aadhar Number: ")
-            while (memberAadhar.isdigit() is False) or (len(memberAadhar) != 12):
-                print("Error, invalid Aadhar number. Enter a 12 digit aadhar.")
-                memberAadhar = input("Enter member Aadhar Number: ")
-            memberEmail = input("Enter member Email: ")
-            memberMobile = input("Enter member Mobile Number: ")
-            while (memberAadhar.isdigit() is False) or (len(memberMobile) != 10):
-                print("Error, invalid mobile number. Enter a 10 digit number.")
-                memberMobile = input("Enter member Mobile Number: ")
+        print("Query done")
+
+        # get support member details here
+        i = 0
+        while i < len(member_data):
+            memberName = member_data[i][0]
+            memberAadhar = member_data[i][1]
+            memberEmail = member_data[i][2]
+            memberMobile = member_data[i][3]
+            i += 1
 
             supportTableName = "support_members" + SysAdmin.thisYear
             insertInSupportTable = "insert into " + supportTableName + " values('" + \
                                    campId + "', '" + memberName + "', '" + memberAadhar + \
                                    "', '" + memberEmail + "', '" + memberMobile + "');"
             cur.execute(insertInSupportTable)
-
-            choice = input("More members?(y/n) ").lower()
-            if choice != 'y':
-                break
 
         print("Total rows affected = {}".format(cur.rowcount))
         cur.close()
@@ -111,15 +110,13 @@ class SysAdmin(Database):
 
     # -----------------------------------------------------------------------------------------------------------------------------
 
-    def registerCamp(self):
+    def registerCamp(self, campName, camp_data, member_data):
         """ in technical terms: Creates a new database for a new camp,
         fills it will all the required tables, sets this camp details in all_camp_details """
 
-        inp = input("Enter camp ID: ").lower()
-        campName = "camp" + inp
-
         if not self.isPresentCamp(campName):
-            query_data = self.__setCampDetails(campName)
+            query_data = self.__setCampDetails(campName, camp_data, member_data)
+            print(query_data)
 
             # connect to default database
             cur, conn = self.connect()
@@ -129,6 +126,7 @@ class SysAdmin(Database):
             cur.execute(createDatabase)
             cur.close()
             conn.close()
+            print("Database " + campName + "created successfully")
 
             # connect with new database (camp)
             cur, conn = self.connect(campName)
@@ -184,6 +182,7 @@ class SysAdmin(Database):
             cur.execute(createMedicalSupplyTable)
 
             myCampInfoTableName = "my_camp_info"
+            print(myCampInfoTableName)
             createMyCampInfoTable = "create table " + myCampInfoTableName + """(
                                         camp_id varchar(20) not null,
                                         camp_name varchar(20) not null,
@@ -202,6 +201,8 @@ class SysAdmin(Database):
                                         primary key(month,year)
                                         );"""
             cur.execute(createMyCampInfoTable)
+            month = str(datetime.datetime.now())[5:7]
+            query_data = query_data + ",'" + month + "','" + SysAdmin.thisYear + "'"
             insertInMyCampInfoTable = "INSERT INTO " + myCampInfoTableName + " values (" + query_data + ");"
             cur.execute(insertInMyCampInfoTable)
 
@@ -215,8 +216,10 @@ class SysAdmin(Database):
             print("Camp " + campName + " successfully registered.")
             cur.close()
             conn.close()
+            return 0
         else:
             print("Camp " + campName + " already exists!!")
+            return 1
 
     # -----------------------------------------------------------------------------------------------------------------------------
     def deRegister(self):
@@ -339,7 +342,7 @@ class SysAdmin(Database):
 
         elif choice == 2:
             print("Details of all camps registered in year 2021: ")
-            header = ["camp_id", "camp_name", "state", "district", "city_or_village", "coordinates", "Admin",
+            header = ["camp_id", "camp_id", "state", "district", "city_or_village", "coordinates", "Admin",
                       "Admin_Aadhar", "email", "phone", "Total Capacity", "Capacity Full?"]
             for item in header:
                 print(item, end='\t')
@@ -369,7 +372,7 @@ class SysAdmin(Database):
                 """ print the details of the camp with details of support members too """
 
                 print()
-                header = ["camp_id", "camp_name", "state", "district", "city_or_village", "coordinates", "Admin",
+                header = ["camp_id", "camp_id", "state", "district", "city_or_village", "coordinates", "Admin",
                           "Admin_Aadhar", "email", "phone", "Total Capacity", "Capacity Full?"]
                 for item in header:
                     print(item, end='\t')

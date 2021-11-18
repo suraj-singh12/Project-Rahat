@@ -1,0 +1,36 @@
+[+] all_camp_details
+[+] camp27b4677
+
+
+=> all_camp_details: 
+[+] campdet2021
+[+] support_members2021
+[+] feedback2021
+[+] demand2021
+
+=>camp27b4677: 
+
+[+] main_table2021
+[+] injury_table2021
+[+] regular_supply_table2021
+[+] medical_supply_table2021
+[+] my_camp_info
+[+] today_all
+
+Inserting values in [all_camp_details]: 
+
+into=> campdet2021
+into=> support_members2021
+into=> support_members2021
+into=> feedback2021
+into=> demand2021
+
+Inserting values in [camp27b4677]: 
+
+into=> main_table2021
+into=> main_table2021
+into=> main_table2021
+into=> injury_table2021
+into=> injury_table2021
+into=> medical_supply_table2021
+into=> my_camp_details

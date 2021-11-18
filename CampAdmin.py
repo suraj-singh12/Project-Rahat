@@ -336,7 +336,7 @@ class CampAdmin(Database):
 
         cur, conn = self.connect("all_camp_details")
         tableName = "campdet" + CampAdmin.thisYear
-        query = "select camp_name, camp_admin, email, phone," + \
+        query = "select camp_id, camp_admin, email, phone," + \
                 "district, city_or_village, total_camp_capacity from " + tableName + \
                 " where capacity_full = 'N' and district = '" + district + "';"
         cur.execute(query)

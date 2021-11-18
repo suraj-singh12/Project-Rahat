@@ -1,5 +1,5 @@
 from Database import Database
-from PyQt5.QtCore import Qt, QSize
+from PyQt5.QtCore import QSize
 from PyQt5.QtWidgets import *
 
 
@@ -185,6 +185,7 @@ class MainWindow(QMainWindow):
         dbase = Database()
         log = open("logfile.log", "a")
         base_db = "all_camp_details"
+
         cur, conn = dbase.connect(base_db)
 
         # thisYear = str(datetime.now().year)
