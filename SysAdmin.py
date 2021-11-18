@@ -22,36 +22,72 @@ class MainTable(QtWidgets.QMainWindow, MainTable2021_UI.Ui_MainWindow):
     def __init__(self):
         super(MainTable, self).__init__()
         self.setupUi(self)
+        self.pushButton.setAutoDefault(True)
+        self.pushButton.clicked.connect(self.ok_clicked)
+
+    def ok_clicked(self):
+        # close the window
+        self.close()
 
 
 class InjuryTable(QtWidgets.QMainWindow, InjuryTable2021_UI.Ui_MainWindow):
     def __init__(self):
         super(InjuryTable, self).__init__()
         self.setupUi(self)
+        self.pushButton.setAutoDefault(True)
+        self.pushButton.clicked.connect(self.ok_clicked)
+
+    def ok_clicked(self):
+        # close the window
+        self.close()
 
 
 class RegularSupply(QtWidgets.QMainWindow, RegularSupplyTable_UI.Ui_MainWindow):
     def __init__(self):
         super(RegularSupply, self).__init__()
         self.setupUi(self)
+        self.pushButton.setAutoDefault(True)
+        self.pushButton.clicked.connect(self.ok_clicked)
+
+    def ok_clicked(self):
+        # close the window
+        self.close()
 
 
 class MedicalSupply(QtWidgets.QMainWindow, MedicalSupplyTable_UI.Ui_MainWindow):
     def __init__(self):
         super(MedicalSupply, self).__init__()
         self.setupUi(self)
+        self.pushButton.setAutoDefault(True)
+        self.pushButton.clicked.connect(self.ok_clicked)
+
+    def ok_clicked(self):
+        # close the window
+        self.close()
 
 
 class TodayAll(QtWidgets.QMainWindow, TodayAll_UI.Ui_MainWindow):
     def __init__(self):
         super(TodayAll, self).__init__()
         self.setupUi(self)
+        self.pushButton.setAutoDefault(True)
+        self.pushButton.clicked.connect(self.ok_clicked)
+
+    def ok_clicked(self):
+        # close the window
+        self.close()
 
 
 class MyCamp(QtWidgets.QMainWindow, MyCampInfo_UI.Ui_MainWindow):
     def __init__(self):
         super(MyCamp, self).__init__()
         self.setupUi(self)
+        self.pushButton.setAutoDefault(True)
+        self.pushButton.clicked.connect(self.ok_clicked)
+
+    def ok_clicked(self):
+        # close the window
+        self.close()
 
 
 class GetDetails(QtWidgets.QWidget, GetCampDetails_UI.Ui_Dialog):
@@ -396,6 +432,18 @@ class SysAdmin(Database):
         #     conn.close()
         # else:
         #     print("Error! " + campName + " is not a registered camp")
+
+    def readTable(self, campName: str, tableName: str) -> tuple:
+        """ reads a table and returns its data """
+
+        # no need to authorize, as only authorized function from app will call it
+        cur, conn = self.connect(campName)
+        cur.execute("SELECT * FROM " + tableName)
+        data = list()
+
+        for row in cur.fetchall():
+            data.append(row)
+        return tuple(data)
 
     # -----------------------------------------------------------------------------------------------------------------------------
 
