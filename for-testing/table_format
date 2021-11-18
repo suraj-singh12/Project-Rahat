@@ -1,0 +1,178 @@
+--------------------------------------------------------------------------
+A camp contains: main_tableYEAR, injury_tableYEAR, regular_supply_table2021, medical_supply_table2021, my_camp_info, today_all
+--------------------------------------------------------------------------
+create table main_table2021(
+family_id varchar(20) not null, 
+member_no int not null,
+name varchar(40) not null,
+age int not null,
+gender char(1) not null,
+relation varchar(10) not null,
+vill_or_city varchar(50) not null,
+loc_in_vill_or_city varchar(70) not null,
+inCamp char(1) not null,
+joinedOn date,
+leftOn date,
+injury char(1) not null,
+primary key (family_id, member_no)
+);
+
+insert into main_table2021 values('FLY1001', 1, 'DemoName', 35, 'M','self','Narayanpur','near Hariram', 'Y', '2021-10-21', null, 'Y');
+insert into main_table2021 values('FLY1001', 2, 'Person2', 40, 'M','brother','Narayanpur','near Hariram', 'N', '2021-10-21', null, 'Y');
+insert into main_table2021 values('FLY1002', 1, 'xgcds', 48, 'M','self','Narayanpur','near Hariram', 'Y', '2021-10-22', null, 'Y');
+"FLY1001"	1	"DemoName"	35	"M"	"self"	"Narayanpur"	"near Hariram"	"Y"	"2021-10-21"		"Y"
+"FLY1001"	2	"Person2"	40	"M"	"brother"	"Narayanpur"	"near Hariram"	"N"	"2021-10-21"		"Y"
+"FLY1002"	1	"xgcds"	48	"M"	"self"	"Narayanpur"	"near Hariram"	"Y"	"2021-10-22"		"Y"
+
+create table injury_table2021(
+family_id varchar(20) not null,
+member_no int not null,
+injury_description varchar(200) not null,
+injury_level char(1) not null,
+recovery_initiated char(1) not null,
+recovery_percent int not null,
+foreign key(family_id, member_no) references main_table2021
+);
+
+
+
+insert into injury_table2021 values('FLY1001', 1, 'xyz bone fracture', 'L', 'Y', 10);
+insert into injury_table2021 values('FLY1002', 1, 'xyz bone fracture', 'L', 'Y', 54);
+"FLY1001"	1	"xyz bone fracture"	"L"	"Y"	10
+"FLY1002"	1	"asdfkafd"	"L"	"Y"	54
+
+--  query to find the recovery details of all those having injury
+select i.family_id, i.member_no, injury_description, injury_level, recovery_initiated, recovery_percent from injury_table2021 as i, main_table2021 as mn
+where mn.family_id=i.family_id and mn.injury='Y' and mn.inCamp='Y';
+
+-- 
+
+
+regular_supply_tableYEAR
+item_name 
+item_type
+description
+qty
+
+create table regular_supply_table2021(
+item_name varchar(50) not null primary key,
+item_type varchar(20) not null,
+description varchar(100) not null,
+qty int not null
+);
+
+
+medicine_supply_tableYEAR
+item_name : PCM 500 mg
+item_type : tab (,oint,gel, etc)
+item_description : used to relieve headache, fever, and pain in body
+age_groups: all (or 6-10 etc)
+qty: 98
+
+create table medical_supply_table2021(
+item_name varchar(50) not null primary key,
+item_type varchar(20) not null,
+description varchar(100) not null,
+age_groups varchar(10) not null,
+qty int not null
+);
+insert into medical_supply_table2021 values('PCM 500mg','tab','used to relieve headache, fever, and pain in body','all',800);
+insert into medical_supply_table2021 values('Calcium Tab 500mg','tab','releive joint pain due to lack of calcium in bones','all',400);
+
+
+my_camp_info
+same structure as all_camp_detail but one more column : YEAR
+
+create table my_camp_info(
+camp_id varchar(20) not null,
+camp_name varchar(20) not null,
+state varchar(20) not null,
+district varchar(20) not null,
+city_or_village varchar(20) not null,
+coordinates varchar(50) not null,
+camp_admin varchar(20) not null,
+camp_admin_aadhar varchar(12) unique not null,
+email varchar(25) not null,
+mobile varchar(10) not null,
+total_camp_capacity int not null,
+capacity_full char(1) not null,
+month varchar(2) not null,
+year varchar(4) not null,
+primary key(month,year)
+);
+insert into my_camp_info values('27b4677','camp27b4677','Assam','Lakhimpur','Narayanpur','26.950841, 93.859420','Narayan','123456789876','example@main.com','1234567890', 400,'N','10','2021');
+
+
+
+a view: today_all (contains all people name, family members name, relation who has been added today)
+(this view is created at the time of camp registration/creation)
+
+create view today_all as
+select family_id, member_no, name, age, gender, relation, vill_or_city, loc_in_vill_or_city, incamp
+from main_table2021, current_date where joinedon = current_date;
+
+create view today_all as
+select family_id, member_no, name, age, gender, relation, vill_or_city, loc_in_vill_or_city, incamp
+from main_tableYEAR, current_date where joinedon = current_date;
+
+The beauty of view is, create once and it is updated automatically as and when the table gets updated
+
+
+--------------------------------------------------------------------
+all_camp_details : campdetYEAR, support_membersYEAR, feedbackYEAR, demandYEAR
+--------------------------------------------------------------------
+
+create table campdet2021(
+camp_id varchar(20) primary key,
+camp_name varchar(20) not null,
+state varchar(20) not null,
+district varchar(20) not null,
+city_or_village varchar(20) not null,
+coordinates varchar(50) not null,
+camp_admin varchar(20) not null,
+camp_admin_aadhar varchar(12) unique not null,
+email varchar(25) not null,
+mobile varchar(10) not null,
+total_camp_capacity int not null,
+capacity_full char(1) not null
+);
+
+insert into campdet2021 values('27b4677','camp27b4677','Assam','Lakhimpur','Narayanpur','26.950841, 93.859420','Narayan','123456789876','example@main.com','1234567890', 400,'N');
+
+
+create table support_members2021(
+camp_id varchar(20) not null,
+Support_member varchar(20) not null,
+member_aadhar varchar(12) unique not null,
+email varchar(25) not null,
+mobile varchar(10) not null,
+foreign key (camp_id) references campdet2021(camp_id)
+);
+
+insert into support_members2021 values(
+'27b4677', 'Lokesh','243567898567','email@mail.com','1234567890');
+insert into support_members2021 values(
+'27b4677', 'Pratap','243567432267','email@mail.com','1234567890');
+
+
+create table feedback2021(
+camp_id varchar(20) primary key references campdet2021(camp_id),
+feedback text not null
+);
+
+
+insert into feedback2021 values('27b4677','This is a feedback.');
+update feedback2021 set feedback = 'This is updated feedback.' where camp_id = '27b4677';
+
+
+create table demand2021(
+camp_id varchar(20) not null references campdet2021(camp_id),
+item_name varchar(40) not null,
+item_type varchar(10) not null,
+item_description varchar(100),
+qty integer not null
+);
+
+item_type: regular/medical
+
+insert into demand2021 values('27b4677', 'pcm 500 mg', 'medical', 'relieve from fever, headache',500);
