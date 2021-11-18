@@ -222,49 +222,70 @@ class SysAdmin(Database):
             return 1
 
     # -----------------------------------------------------------------------------------------------------------------------------
-    def deRegister(self):
+    def deRegister_step1(self, campName):
         """ in technical terms: drop a database"""
-
-        inp = input("Enter camp ID: ").lower()
-        campName = "camp" + inp
-
+        print("in")
         if self.isPresentCamp(campName):
-            # https://stackoverflow.com/questions/13719674/change-database-postgresql-in-python-using-psycopg2-dynamically
-
             # connect to required camp database
             cur, conn = self.connect(campName)
             # find all existing relations/tables in database
             cur.execute("SELECT * FROM information_schema.tables WHERE table_schema = 'public'")
 
+            print("before rowcount")
             if cur.rowcount == 0:
                 print("No relation found in " + campName)
-            else:
-                print("\nAll these relations exist in " + campName + " :")
-                for table in cur.fetchall():
-                    print(table[2], end=' ')
-
-            print("\n\n[Note: This action is irreversible and you will lose all the data of this camp]")
-            consent = input("\nAre you sure you want to de-register this camp?(y/n): ")
-
-            if consent.lower() == 'y':
-                # close connection with current database
                 cur.close()
                 conn.close()
+                message = "No relation found in " + campName
+                message += '\n' + "Are You sure you want to de-register this camp?\n"
+                return message
+
+            print("\nAll these relations exist in " + campName + " :")
+            all_relations = ''
+            for table in cur.fetchall():
+                print(table[2], end=' ')
+                all_relations += str(table[2]) + '\n'
+            cur.close()
+            conn.close()
+            message = "All these relations exist in " + campName + '\n' + all_relations
+            message += '\n' + "Are You sure you want to de-register this camp?\n"
+            return message
+        else:
+            return -1
+
+    def deRegister_step2(self, campName):
+            print("\n\n[Note: This action is irreversible and you will lose all the data of this camp]")
+
+            # consent = QtWidgets.QMessageBox()
+            # consent.setWindowTitle("Question")
+            # consent.setText("Are you sure you want to de-register this camp?")
+            # consent.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+            # consent.exec()
+
+            # consent = input("\nAre you sure you want to de-register this camp?(y/n): ")
+            # if consent == QtWidgets.QMessageBox.Yes:
+            #     consent = 'y'
+
+            # if consent.lower() == 'y':
+                # close connection with current database
+                # cur.close()
+                # conn.close()
                 # connect to default database
+            try:
                 cur, conn = self.connect()
                 # drop the desired database
                 cur.execute("DROP DATABASE " + campName + ";")
+                print("database removed (but not info)")
 
                 # also remove it's information from all_camps_details
                 self.__removeCampDetails(campName)
                 print("Successfully de-registered " + campName)
-            else:
-                print("Operation Aborted!")
-                # close connection with whatever database is connected
-            cur.close()
-            conn.close()
-        else:
-            print("Error! There is no camp as " + campName)
+                cur.close()
+                conn.close()
+                return 0
+            except:
+                print("Error, could not de-register " + campName)
+                return 1
 
     # -----------------------------------------------------------------------------------------------------------------------------
     def readCamp(self):
