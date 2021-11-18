@@ -13,21 +13,22 @@ class SysAdminWindow(QMainWindow, SystemAdmin_UI.Ui_MainWindow):
         self.setupUi(self)
 
         self.pushButton.clicked.connect(self.setup_for_create_database)
-        self.pushButton_3.clicked.connect(self.drop_database)
+        self.pushButton_3.clicked.connect(self.setup_for_drop_database)
         self.pushButton_2.clicked.connect(self.read_a_database)
         self.pushButton_4.clicked.connect(self.list_camps_n_details)
         self.pushButton_5.clicked.connect(self.exit_now)
+
         # this is the button below the field asking campName
         self.pushButton_6.setText("Disabled")
         self.pushButton_6.setEnabled(False)
         self.pushButton_6.setAutoDefault(True)
-
         # later functions enable this, then this line is required
         self.pushButton_6.clicked.connect(self.call_appropriate)
+
         # if this window is visible that means authentication was done successfully
-        self.admin = None
         self.camp_name = None
         self.__pswd = "IamSysAdmin99"
+        self.admin = SysAdmin.SysAdmin(self.__pswd)
 
         self.response = None        # used in create_database to find if camp registered successfully
         self.createDbase_step1 = SysAdmin.GetDetails()      # getDetails Window of camp while registering
@@ -36,21 +37,52 @@ class SysAdminWindow(QMainWindow, SystemAdmin_UI.Ui_MainWindow):
         self.camp_data = []
         self.times = None
         # very important to keep such signals out of fns that repeat, otherwise the signals get multiplied
+        # this calls member data forms n times (n = no of support members entered)
         self.createDbase_step2.pushButton.clicked.connect(self.check_times)
 
     def call_appropriate(self):
         txt = self.pushButton_6.text()
         if txt == "Proceed":
             self.get_details()
-        elif txt == "UnRegister":
+        elif txt == "DeRegister":
             self.drop_database()
 
         self.pushButton_6.setEnabled(False)
         self.pushButton_6.setText("Disabled")
 
+    # ----------------------- For De-registering camp -----------------------
+    def setup_for_drop_database(self):
+        print("Drop database signal received")
+        print("before focus")
+
+        self.lineEdit.setFocus()
+        self.lineEdit.clear()
+        self.pushButton_6.setText("DeRegister")
+        self.pushButton_6.setEnabled(True)
+
+    def drop_database(self):
+        print("Drop database signal2 received")
+
+        self.camp_name = "camp" + self.lineEdit.text()
+        self.data = self.admin.deRegister_step1(self.camp_name)
+        print(self.data)
+        if self.data == -1:
+            QMessageBox.critical(self, "Invalid", "Error!! No such camp exists!!")
+            self.label_6.setText(self.camp_name + " camp does not exists!!")
+        else:
+            self.response = QMessageBox.question(self, "Are You Sure", self.data)
+
+            if self.response == QMessageBox.Yes:
+                self.admin.deRegister_step2(self.camp_name)
+                QMessageBox.information(self, "Information", self.camp_name + " de-registered successfully.")
+                self.label_6.setText(self.camp_name + " successfully de-registered.")
+            elif self.response == QMessageBox.No:
+                QMessageBox.information(self, "Abort", self.camp_name + " de-registration aborted!!")
+                self.label_6.setText(self.camp_name + " de-registration Abort!!")
+
+    # ----------------------- For registering camp -----------------------
     def setup_for_create_database(self):
         print("Create database signal received")
-        self.admin = SysAdmin.SysAdmin(self.__pswd)
         print("before focus")
 
         self.lineEdit.setFocus()
@@ -126,8 +158,7 @@ class SysAdminWindow(QMainWindow, SystemAdmin_UI.Ui_MainWindow):
         self.camp_data = []
         self.members_data = []
 
-    def drop_database(self):
-        print("Drop database signal received")
+    # ----------------------- ----------------------- -----------------------
 
     def read_a_database(self):
         print("Read a database signal received")
@@ -225,6 +256,7 @@ class ControllerWindow(QMainWindow):
             exit(-1)
         # if password is correct then System Admin window will pop up else exit()
         # create and show sysAdminWindow
+        del self.admin
         self.win = SysAdminWindow()
         self.win.showMaximized()
 
