@@ -1,5 +1,5 @@
 import sys
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui
 import Portal_UI
 import SystemAdmin_UI
 from PyQt5.QtWidgets import *
@@ -14,7 +14,7 @@ class SysAdminWindow(QMainWindow, SystemAdmin_UI.Ui_MainWindow):
 
         self.pushButton.clicked.connect(self.setup_for_create_database)
         self.pushButton_3.clicked.connect(self.setup_for_drop_database)
-        self.pushButton_2.clicked.connect(self.read_a_database)
+        self.pushButton_2.clicked.connect(self.setup_for_read_database)
         self.pushButton_4.clicked.connect(self.list_camps_n_details)
         self.pushButton_5.clicked.connect(self.exit_now)
 
@@ -40,15 +40,130 @@ class SysAdminWindow(QMainWindow, SystemAdmin_UI.Ui_MainWindow):
         # this calls member data forms n times (n = no of support members entered)
         self.createDbase_step2.pushButton.clicked.connect(self.check_times)
 
+        # used in read a table
+        self.select_table = None
+        self.data = None
+
     def call_appropriate(self):
         txt = self.pushButton_6.text()
         if txt == "Proceed":
             self.get_details()
         elif txt == "DeRegister":
             self.drop_database()
+        elif txt == "Read":
+            self.read_a_database()
 
         self.pushButton_6.setEnabled(False)
         self.pushButton_6.setText("Disabled")
+
+    # ----------------------- For displaying information of a specific camp -----------------------
+    def setup_for_read_database(self):
+        print("Read a database signal received")
+        print("before focus")
+        # display all databases in side label
+        all_databases_list = self.admin.listAllDatabases()[3:]      # leaving top 3 camps (are of postgres server)
+        all_databases = "All Camp (Names) currently registered are:\n\n"
+        for db in all_databases_list:
+            all_databases += db + '\n'
+        self.label_4.setText('')
+        self.label_4.setFont(QtGui.QFont("MS Shell Dlg 2", 12))
+        self.label_4.setText(all_databases)
+        # auto expand (to be used every time new text is set)
+        self.label_4.adjustSize()
+
+        # connect to camp id line
+        self.lineEdit.setFocus()
+        self.lineEdit.clear()
+        self.pushButton_6.setText("Read")
+        self.pushButton_6.setEnabled(True)
+
+    def read_a_database(self):
+        print("Read a database signal received")
+        # extract camp id and make camp_name
+        self.camp_name = "camp" + self.lineEdit.text()
+
+        # restructure
+        self.data = self.admin.readCamp(self.camp_name)
+        # print(self.data)
+        # print("here")
+        if self.data[0] == '-1':
+            QMessageBox.critical(self, "Invalid", self.camp_name + "is not a registered camp!!\t")
+        else:
+            self.label_4.setText('')
+            self.label_4.setFont(QtGui.QFont("MS Shell Dlg 2", 12))
+            self.label_4.setText(self.data[0])
+            self.label_4.adjustSize()
+            self.select_table = SysAdmin.SelectATable()
+            if 'main_table2021' not in self.data[1]:
+                # disable main_table button
+                self.select_table.pushButton.setEnabled(False)
+            elif 'injury_table2021' not in self.data[1]:
+                self.select_table.pushButton_2.setEnabled(False)
+            elif 'regular_supply_table2021' not in self.data[1]:
+                self.select_table.pushButton_3.setEnabled(False)
+            elif 'medical_supply_table2021' not in self.data[1]:
+                self.select_table.pushButton_4.setEnabled(False)
+            elif 'my_camp_info' not in self.data[1]:
+                self.select_table.pushButton_5.setEnabled(False)
+            elif 'today_all' not in self.data[1]:
+                self.select_table.pushButton_6.setEnabled(False)
+
+            self.select_table.show()
+            self.select_table.pushButton.clicked.connect(self.launch_main_table_window)
+            self.select_table.pushButton_2.clicked.connect(self.launch_injury_table_window)
+            self.select_table.pushButton_3.clicked.connect(self.launch_regular_supply_table_window)
+            self.select_table.pushButton_4.clicked.connect(self.launch_medical_supply_table_window)
+            self.select_table.pushButton_5.clicked.connect(self.launch_my_camp_info_window)
+            self.select_table.pushButton_6.clicked.connect(self.launch_today_view_all_window)
+
+    def launch_main_table_window(self):
+        self.main_table_win = SysAdmin.MainTable()
+        # get the data
+        # set the data
+        # show
+        self.main_table_win.show()
+        print("shown")
+
+    def launch_injury_table_window(self):
+        self.injury_table_win = SysAdmin.InjuryTable()
+        # get the data
+        # set the data
+        # show
+        self.injury_table_win.show()
+
+    def launch_regular_supply_table_window(self):
+        self.regular_supply_win = SysAdmin.RegularSupply()
+        # get the data
+        # set the data
+        # show
+        self.regular_supply_win.show()
+
+    def launch_medical_supply_table_window(self):
+        self.medical_supply_win = SysAdmin.MedicalSupply()
+        # get the data
+        # set the data
+        # show
+        self.medical_supply_win.show()
+
+    def launch_my_camp_info_window(self):
+        self.my_camp_win = SysAdmin.MyCamp()
+        # get the data
+        # set the data
+        # get len(), run that many times, from a list, which keeps changing i (row) value for label, in loop it changes for j
+        # for i in range(len(data_list)):
+        #    for j in range(13):
+        #       col = "label_blank" + str(i) + "_" + str(j)
+        #       set data in this column
+
+        # show
+        self.my_camp_win.show()
+
+    def launch_today_view_all_window(self):
+        self.today_view_win = SysAdmin.TodayAll()
+        # get the data
+        # set the data
+        # show
+        self.today_view_win.show()
 
     # ----------------------- For De-registering camp -----------------------
     def setup_for_drop_database(self):
@@ -159,9 +274,6 @@ class SysAdminWindow(QMainWindow, SystemAdmin_UI.Ui_MainWindow):
         self.members_data = []
 
     # ----------------------- ----------------------- -----------------------
-
-    def read_a_database(self):
-        print("Read a database signal received")
 
     def list_camps_n_details(self):
         print("List all camps and their details signal received")

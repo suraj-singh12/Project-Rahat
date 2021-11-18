@@ -3,6 +3,55 @@ from Database import Database
 import datetime
 import GetCampDetails_UI
 from PyQt5 import QtWidgets
+import SelectTableToRead_UI
+import MainTable2021_UI
+import InjuryTable2021_UI
+import RegularSupplyTable_UI
+import MedicalSupplyTable_UI
+import TodayAll_UI
+import MyCampInfo_UI
+
+
+class SelectATable(QtWidgets.QWidget, SelectTableToRead_UI.Ui_Dialog):
+    def __init__(self):
+        super(SelectATable, self).__init__()
+        self.setupUi(self)
+
+
+class MainTable(QtWidgets.QMainWindow, MainTable2021_UI.Ui_MainWindow):
+    def __init__(self):
+        super(MainTable, self).__init__()
+        self.setupUi(self)
+
+
+class InjuryTable(QtWidgets.QMainWindow, InjuryTable2021_UI.Ui_MainWindow):
+    def __init__(self):
+        super(InjuryTable, self).__init__()
+        self.setupUi(self)
+
+
+class RegularSupply(QtWidgets.QMainWindow, RegularSupplyTable_UI.Ui_MainWindow):
+    def __init__(self):
+        super(RegularSupply, self).__init__()
+        self.setupUi(self)
+
+
+class MedicalSupply(QtWidgets.QMainWindow, MedicalSupplyTable_UI.Ui_MainWindow):
+    def __init__(self):
+        super(MedicalSupply, self).__init__()
+        self.setupUi(self)
+
+
+class TodayAll(QtWidgets.QMainWindow, TodayAll_UI.Ui_MainWindow):
+    def __init__(self):
+        super(TodayAll, self).__init__()
+        self.setupUi(self)
+
+
+class MyCamp(QtWidgets.QMainWindow, MyCampInfo_UI.Ui_MainWindow):
+    def __init__(self):
+        super(MyCamp, self).__init__()
+        self.setupUi(self)
 
 
 class GetDetails(QtWidgets.QWidget, GetCampDetails_UI.Ui_Dialog):
@@ -288,12 +337,8 @@ class SysAdmin(Database):
                 return 1
 
     # -----------------------------------------------------------------------------------------------------------------------------
-    def readCamp(self):
+    def readCamp(self, campName):
         """ Read data of any camp by campID """
-
-        inp = input("Enter the camp ID: ")
-        campName = "camp" + inp
-        # campName = inp        # uncomment this to access testingBase database and comment out above line
 
         if self.isPresentCamp(campName):
             # connect to required camp database
@@ -303,33 +348,54 @@ class SysAdmin(Database):
 
             if cur.rowcount == 0:
                 print("NO relation found in " + campName)
-            else:
-                print("\nRelations of " + campName + " :")
-                print("==> ", end='')
+                cur.close()
+                conn.close()
+                message = "No relation found in " + campName
+                t = list()
+                t.append(message)
+                t.append('')
+                return tuple(t)      # show on grey label
 
-                all_relations = list()
-                # print all the relations in current database
-                for table in cur.fetchall():
-                    # print(table)
-                    print(table[2], end=', ')  # prints the table name only
-                    all_relations.append(table[2])
-                print()
+            print("\nRelations of " + campName + " :")
+            print("==> ", end='')
 
-                relation = input("Enter the relation name you want to access: ")
-
-                # if the relation is present then print its data, else say not found
-                if relation in all_relations:
-                    print("Data of " + relation + ": ")
-                    cur.execute("select * from " + relation + ";")
-                    for row in cur.fetchall():
-                        print(row)
-                else:
-                    print("Error, " + relation + " not found! Please select an existing relation")
-
+            all_relations = ''
+            all_relations_list = []
+            # print all the relations in current database
+            for table in cur.fetchall():
+                # print(table)
+                print(table[2], end=', ')  # prints the table name only
+                all_relations += table[2] + '\n'
+                all_relations_list.append(table[2])
+            print()
             cur.close()
             conn.close()
+            message = "All these relations exist in " + campName + '\n\n' + all_relations
+            t = list()
+            t.append(message)
+            t.append(all_relations_list)
+            # print(t)
+            return tuple(t)
         else:
-            print("Error! " + campName + " is not a registered camp")
+            t = list()
+            t.append('-1')
+            return tuple(t)
+        #
+        #         relation = input("Enter the relation name you want to access: ")
+        #
+        #         # if the relation is present then print its data, else say not found
+        #         if relation in all_relations:
+        #             print("Data of " + relation + ": ")
+        #             cur.execute("select * from " + relation + ";")
+        #             for row in cur.fetchall():
+        #                 print(row)
+        #         else:
+        #             print("Error, " + relation + " not found! Please select an existing relation")
+        #
+        #     cur.close()
+        #     conn.close()
+        # else:
+        #     print("Error! " + campName + " is not a registered camp")
 
     # -----------------------------------------------------------------------------------------------------------------------------
 

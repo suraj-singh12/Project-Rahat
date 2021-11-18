@@ -46,6 +46,7 @@ class Database:
             print(error)
 
     def listAllDatabases(self):
+        print("Entered in listAllDatabases")
         # connect to default database
         cur, conn = self.connect()
         # query to list all databases
@@ -55,6 +56,7 @@ class Database:
             db_list.append(db[0])
         cur.close()
         conn.close()
+        print("db_list created")
         return db_list
 
     def isPresentCamp(self, database):
