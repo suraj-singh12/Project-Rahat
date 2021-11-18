@@ -3,6 +3,8 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 import Portal_UI
 import SystemAdmin_UI
 from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
 from CampAdmin import CampAdmin
 import SysAdmin
 
@@ -119,51 +121,138 @@ class SysAdminWindow(QMainWindow, SystemAdmin_UI.Ui_MainWindow):
     def launch_main_table_window(self):
         self.main_table_win = SysAdmin.MainTable()
         # get the data
-        # set the data
-        # show
-        self.main_table_win.show()
-        print("shown")
+        self.data = self.admin.readTable(self.camp_name, "main_table2021")
+        print(self.data)
+
+        # if data is there in table then
+        if len(self.data) != 0:
+            # set the data
+            for i in range(len(self.data)):
+                for j in range(len(self.data[i])):
+                    self.tmp_label = QLabel()
+                    self.tmp_label.setText(str(self.data[i][j]))
+                    self.tmp_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+                    self.tmp_label.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                    # self.tmp_label.setMargin(0)
+                    # self.tmp_label.setFont(QFont(("MS Shell Dlg 2", 8)))
+                    # self.tmp_label.setStyleSheet("QLabel {background-color: red;}")
+                    # self.tmp_label.setLineWidth("1")
+                    self.main_table_win.gridLayout.addWidget(self.tmp_label, i+1, j)
+            # show
+            self.main_table_win.show()
+            print("shown")
+        else:
+            QMessageBox.critical(self, "Empty", "The table is empty!!")
 
     def launch_injury_table_window(self):
         self.injury_table_win = SysAdmin.InjuryTable()
         # get the data
-        # set the data
-        # show
-        self.injury_table_win.show()
+        self.data = self.admin.readTable(self.camp_name, "injury_table2021")
+        print(self.data)
+
+        # if data is there in table then
+        if len(self.data) != 0:
+            # set the data
+            for i in range(len(self.data)):
+                for j in range(len(self.data[i])):
+                    self.tmp_label = QLabel()
+                    self.tmp_label.setText(str(self.data[i][j]))
+                    self.tmp_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+                    self.tmp_label.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                    self.injury_table_win.gridLayout.addWidget(self.tmp_label, i + 1, j)
+            # show
+            self.injury_table_win.show()
+            print("shown")
+        else:
+            QMessageBox.critical(self, "Empty", "The table is empty!!")
 
     def launch_regular_supply_table_window(self):
         self.regular_supply_win = SysAdmin.RegularSupply()
         # get the data
-        # set the data
-        # show
-        self.regular_supply_win.show()
+        self.data = self.admin.readTable(self.camp_name, "regular_supply_table2021")
+        print(self.data)
+
+        # if data is there in table then
+        if len(self.data) != 0:
+            # set the data
+            for i in range(len(self.data)):
+                for j in range(len(self.data[i])):
+                    self.tmp_label = QLabel()
+                    self.tmp_label.setText(str(self.data[i][j]))
+                    self.tmp_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+                    self.tmp_label.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                    self.regular_supply_win.gridLayout.addWidget(self.tmp_label, i + 1, j)
+            # show
+            self.regular_supply_win.show()
+            print("shown")
+        else:
+            QMessageBox.critical(self, "Empty", "The table is empty!!")
 
     def launch_medical_supply_table_window(self):
         self.medical_supply_win = SysAdmin.MedicalSupply()
         # get the data
-        # set the data
-        # show
-        self.medical_supply_win.show()
+        self.data = self.admin.readTable(self.camp_name, "medical_supply_table2021")
+        print(self.data)
+
+        # if data is there in table then
+        if len(self.data) != 0:
+            # set the data
+            for i in range(len(self.data)):
+                for j in range(len(self.data[i])):
+                    self.tmp_label = QLabel()
+                    self.tmp_label.setText(str(self.data[i][j]))
+                    self.tmp_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+                    self.tmp_label.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                    self.medical_supply_win.gridLayout.addWidget(self.tmp_label, i + 1, j)
+            # show
+            self.medical_supply_win.show()
+            print("shown")
+        else:
+            QMessageBox.critical(self, "Empty", "The table is empty!!")
 
     def launch_my_camp_info_window(self):
         self.my_camp_win = SysAdmin.MyCamp()
         # get the data
-        # set the data
-        # get len(), run that many times, from a list, which keeps changing i (row) value for label, in loop it changes for j
-        # for i in range(len(data_list)):
-        #    for j in range(13):
-        #       col = "label_blank" + str(i) + "_" + str(j)
-        #       set data in this column
+        self.data = self.admin.readTable(self.camp_name, "my_camp_info")
+        print(self.data)
 
-        # show
-        self.my_camp_win.show()
+        # if data is there in table then
+        if len(self.data) != 0:
+            # set the data
+            for i in range(len(self.data)):
+                for j in range(len(self.data[i])):
+                    self.tmp_label = QLabel()
+                    self.tmp_label.setText(str(self.data[i][j]))
+                    self.tmp_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+                    self.tmp_label.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                    self.my_camp_win.gridLayout.addWidget(self.tmp_label, i + 1, j)
+            # show
+            self.my_camp_win.show()
+            print("shown")
+        else:
+            QMessageBox.critical(self, "Empty", "The table is empty!!")
 
     def launch_today_view_all_window(self):
         self.today_view_win = SysAdmin.TodayAll()
         # get the data
-        # set the data
-        # show
-        self.today_view_win.show()
+        self.data = self.admin.readTable(self.camp_name, "today_all")
+        print(self.data)
+
+        # if data is there in table then
+        if len(self.data) != 0:
+            # set the data
+            for i in range(len(self.data)):
+                for j in range(len(self.data[i])):
+                    self.tmp_label = QLabel()
+                    self.tmp_label.setText(str(self.data[i][j]))
+                    self.tmp_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+                    self.tmp_label.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                    self.today_view_win.gridLayout.addWidget(self.tmp_label, i + 1, j)
+            # show
+            self.today_view_win.show()
+            print("shown")
+        else:
+            QMessageBox.critical(self, "Empty", "The table is empty!!")
 
     # ----------------------- For De-registering camp -----------------------
     def setup_for_drop_database(self):
