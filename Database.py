@@ -66,3 +66,17 @@ class Database:
         if database in db_list:
             return True
         return False
+
+    def readTable(self, database: str, table_name: str) -> tuple:
+        """ reads a table and returns its data """
+
+        # no need to authorize, as only authorized function from app will call it
+        cur, conn = self.connect(database)
+        cur.execute("SELECT * FROM " + table_name)
+        data = list()
+
+        for row in cur.fetchall():
+            data.append(row)
+        cur.close()
+        conn.close()
+        return tuple(data)

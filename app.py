@@ -2,11 +2,348 @@ import sys
 from PyQt5 import QtWidgets, QtGui
 import Portal_UI
 import SystemAdmin_UI
+import CampAdmin_UI
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from CampAdmin import CampAdmin
+import CampAdmin
 import SysAdmin
+
+
+class CampAdminWindow(QMainWindow, CampAdmin_UI.Ui_MainWindow):
+    def __init__(self, camp_name):
+        super(CampAdminWindow, self).__init__()
+        self.setupUi(self)
+        # disable all input boxes (default)
+        self.lineEdit.setEnabled(False)
+        self.lineEdit_2.setEnabled(False)
+        self.lineEdit_3.setEnabled(False)
+        self.lineEdit_4.setEnabled(False)
+        # disable both buttons (update, find)
+        self.pushButton_71.setText("Disabled")
+        self.pushButton_71.setEnabled(False)
+        self.pushButton_72.setText("Disabled")
+        self.pushButton_72.setEnabled(False)
+        # disable labels
+        self.label_1.setEnabled(False)
+        self.label_2.setEnabled(False)
+        self.label_3.setEnabled(False)
+        self.label_4.setEnabled(False)
+
+        self.label_item_type.setEnabled(False)
+        self.comboBox_item_type.setEnabled(False)
+
+        self.pushButton.clicked.connect(self.read_my_tables)
+
+        self.pushButton_2.clicked.connect(self.new_person_form)
+        self.new_person_data = list()     # will become a list later on
+        self.count = None
+        self.new_person_win = CampAdmin.NewPerson()
+        # for first member
+        self.new_person_win.lineEdit_4.setText("self")
+        self.new_person_win.lineEdit_4.setEnabled(False)
+
+        self.new_person_win.checkBox.clicked.connect(self.configure_injury_subform)
+        self.new_person_win.checkBox_2.clicked.connect(self.configure_injury_subform)
+        self.new_person_win.comboBox_2.currentIndexChanged.connect(self.toggle_recovery_percent)
+        # when submit is pressed
+        self.new_person_win.pushButton.clicked.connect(self.check_times)
+
+        self.pushButton_9.clicked.connect(self.launch_today_view_all_window)
+        self.pushButton_6.clicked.connect(self.exit_now)
+
+        # initialize the object
+        self.camp_name = camp_name
+        print(self.camp_name)
+        self.__pswd = "IamCampAdmin88"
+        self.admin = CampAdmin.CampAdmin(self.camp_name, self.__pswd)
+
+    def new_person_form(self):
+        self.new_person_win.show()
+
+    def toggle_recovery_percent(self):
+        if self.new_person_win.comboBox_2.currentText() == "Yes":
+            self.new_person_win.spinBox_2.setEnabled(True)
+        else:
+            self.new_person_win.spinBox_2.setEnabled(False)
+
+    def configure_injury_subform(self):
+        print("in configure injury form")
+        print(self.new_person_win.checkBox.isChecked(), self.new_person_win.checkBox_2.isChecked())
+        if self.new_person_win.checkBox.isChecked() and self.new_person_win.checkBox_2.isChecked():
+            # enable injury subform (input fields)
+            self.new_person_win.lineEdit_7.setEnabled(True)
+            self.new_person_win.comboBox.setEnabled(True)
+            self.new_person_win.comboBox_2.setEnabled(True)
+            # enable injury subform (labels)
+            self.new_person_win.label_9.setEnabled(True)
+            self.new_person_win.label_10.setEnabled(True)
+            self.new_person_win.label_11.setEnabled(True)
+            self.new_person_win.label_12.setEnabled(True)
+            self.new_person_win.label_14.setEnabled(True)
+        else:
+            print("In false block")
+            # disable injury subform (input fields)
+            self.new_person_win.lineEdit_7.setEnabled(False)
+            self.new_person_win.comboBox.setEnabled(False)
+            self.new_person_win.comboBox_2.setEnabled(False)
+            # self.new_person_win.spinBox_2.setEnabled(False)
+            # disable injury subform (labels)
+            self.new_person_win.label_9.setEnabled(False)
+            self.new_person_win.label_10.setEnabled(False)
+            self.new_person_win.label_11.setEnabled(False)
+            self.new_person_win.label_12.setEnabled(False)
+            self.new_person_win.label_14.setEnabled(False)
+
+    def check_times(self):
+        tmpLst = list()
+        tmpLst.append(self.new_person_win.lineEdit.text())
+        tmpLst.append(self.new_person_win.spinBox.text())
+        gender = ''
+        if self.new_person_win.radioButton.isChecked():
+            gender = 'M'
+        else:
+            gender = 'F'
+        tmpLst.append(gender)
+        tmpLst.append(self.new_person_win.lineEdit_4.text())
+        tmpLst.append(self.new_person_win.lineEdit_5.text())
+        tmpLst.append(self.new_person_win.lineEdit_6.text())
+        tmpLst.append(self.new_person_win.spinBox_3.text())
+        if self.new_person_win.checkBox.isChecked():
+            tmpLst.append('Y')
+        else:
+            tmpLst.append('N')
+        if self.new_person_win.checkBox_2.isChecked():
+            tmpLst.append('Y')
+        else:
+            tmpLst.append('N')
+        tmpLst = tuple(tmpLst)
+        print(tmpLst)
+
+        tmpLst2 = list()
+        tmpLst2.append(self.new_person_win.lineEdit_7.text())
+        tmpLst2.append(self.new_person_win.comboBox.currentText())
+        tmpLst2.append(self.new_person_win.comboBox_2.currentText())
+        tmpLst2.append(self.new_person_win.spinBox_2.text())
+        tmpLst2 = tuple(tmpLst2)
+
+        print("yes till here")
+        one_packet = (tmpLst, tmpLst2)      # two tuples in single tuple (data of one person)
+        self.new_person_data.append(one_packet)
+        print(one_packet)
+        # extract form data and store in self.new_person_data
+
+        self.count = int(self.new_person_win.spinBox_3.text()) - 1
+        # then check the counter, decrement no of persons
+        print(self.count)
+
+        self.new_person_win.spinBox_3.setEnabled(True)
+        self.new_person_win.spinBox_3.setValue(self.count)
+        self.new_person_win.spinBox_3.setEnabled(False)
+        # but first update - total_family_members (spinbox3) then  lock
+        print("count set")
+
+        self.new_person_win.lineEdit_5.setEnabled(False)
+        self.new_person_win.lineEdit_6.setEnabled(False)
+        # lock : village/city loc in vill/city (lineEdit5, lineEdit6)
+
+        self.new_person_win.lineEdit_4.setEnabled(True)
+        # unlock lineEdit_4 (relation)
+        print("Going to press Reset button")
+
+        self.new_person_win.pushButton_2.click()
+        # send reset signal to all : click the pushbutton2
+        self.new_person_win.close()
+        # close the window
+
+        # checkboxes unchecked
+        self.new_person_win.checkBox.setCheckState(False)
+        self.new_person_win.checkBox_2.setCheckState(False)
+        # injury record combo boxes set to default
+        self.new_person_win.comboBox.setCurrentIndex(0)
+        self.new_person_win.comboBox.setEnabled(False)
+        self.new_person_win.comboBox_2.setCurrentIndex(0)
+        self.new_person_win.comboBox_2.setEnabled(False)
+        self.new_person_win.lineEdit_7.setEnabled(False)
+
+        self.new_person_win.radioButton.setChecked(False)
+        self.new_person_win.radioButton_2.setChecked(False)
+
+        if self.count > 0:
+            self.new_person_form()
+        else:
+            self.new_person_win = CampAdmin.NewPerson() # for the next time (it is a new window)
+            print("Time to send all data for final action")
+            self.response = self.admin.writeInto(self.camp_name, tuple(self.new_person_data))
+            # print(self.response)
+            QMessageBox.information(self, "Information", self.response)
+        # and again call new_person_form if count>0
+
+    def exit_now(self):
+        exit(0)
+
+    def read_my_tables(self):
+        self.select_table = CampAdmin.SelectATable()
+        self.select_table.pushButton.clicked.connect(self.launch_main_table_window)
+        self.select_table.pushButton_2.clicked.connect(self.launch_injury_table_window)
+        self.select_table.pushButton_3.clicked.connect(self.launch_regular_supply_table_window)
+        self.select_table.pushButton_4.clicked.connect(self.launch_medical_supply_table_window)
+        self.select_table.pushButton_5.clicked.connect(self.launch_my_camp_info_window)
+        self.select_table.pushButton_6.clicked.connect(self.launch_today_view_all_window)
+        self.select_table.show()
+
+    def launch_main_table_window(self):
+        self.main_table_win = CampAdmin.MainTable()
+        # get the data
+        self.data = self.admin.readTable(self.camp_name, "main_table2021")
+        print(self.data)
+
+        # if data is there in table then
+        if len(self.data) != 0:
+            # set the data
+            for i in range(len(self.data)):
+                for j in range(len(self.data[i])):
+                    self.tmp_label = QLabel()
+                    self.tmp_label.setText(str(self.data[i][j]))
+                    self.tmp_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+                    self.tmp_label.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                    # self.tmp_label.setMargin(0)
+                    # self.tmp_label.setFont(QFont(("MS Shell Dlg 2", 8)))
+                    # self.tmp_label.setStyleSheet("QLabel {background-color: red;}")
+                    # self.tmp_label.setLineWidth("1")
+                    self.main_table_win.gridLayout.addWidget(self.tmp_label, i + 1, j)
+            # show
+            self.main_table_win.show()
+            print("shown")
+        else:
+            QMessageBox.critical(self, "Empty", "The table is empty!!\t")
+
+    def launch_injury_table_window(self):
+        self.injury_table_win = SysAdmin.InjuryTable()
+        # get the data
+        self.data = self.admin.readTable(self.camp_name, "injury_table2021")
+        print(self.data)
+
+        # if data is there in table then
+        if len(self.data) != 0:
+            # set the data
+            for i in range(len(self.data)):
+                for j in range(len(self.data[i])):
+                    self.tmp_label = QLabel()
+                    self.tmp_label.setText(str(self.data[i][j]))
+                    self.tmp_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+                    self.tmp_label.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                    self.injury_table_win.gridLayout.addWidget(self.tmp_label, i + 1, j)
+            # show
+            self.injury_table_win.show()
+            print("shown")
+        else:
+            QMessageBox.critical(self, "Empty", "The table is empty!!\t")
+
+    def launch_regular_supply_table_window(self):
+        self.regular_supply_win = SysAdmin.RegularSupply()
+        # get the data
+        self.data = self.admin.readTable(self.camp_name, "regular_supply_table2021")
+        print(self.data)
+
+        # if data is there in table then
+        if len(self.data) != 0:
+            # set the data
+            for i in range(len(self.data)):
+                for j in range(len(self.data[i])):
+                    self.tmp_label = QLabel()
+                    self.tmp_label.setText(str(self.data[i][j]))
+                    self.tmp_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+                    self.tmp_label.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                    self.regular_supply_win.gridLayout.addWidget(self.tmp_label, i + 1, j)
+            # show
+            self.regular_supply_win.show()
+            print("shown")
+        else:
+            QMessageBox.critical(self, "Empty", "The table is empty!!\t")
+
+    def launch_medical_supply_table_window(self):
+        self.medical_supply_win = SysAdmin.MedicalSupply()
+        # get the data
+        self.data = self.admin.readTable(self.camp_name, "medical_supply_table2021")
+        print(self.data)
+
+        # if data is there in table then
+        if len(self.data) != 0:
+            # set the data
+            for i in range(len(self.data)):
+                for j in range(len(self.data[i])):
+                    self.tmp_label = QLabel()
+                    self.tmp_label.setText(str(self.data[i][j]))
+                    self.tmp_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+                    self.tmp_label.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                    self.medical_supply_win.gridLayout.addWidget(self.tmp_label, i + 1, j)
+            # show
+            self.medical_supply_win.show()
+            print("shown")
+        else:
+            QMessageBox.critical(self, "Empty", "The table is empty!!\t")
+
+    def launch_my_camp_info_window(self):
+        self.my_camp_win = SysAdmin.MyCamp()
+        # get the data
+        self.data = self.admin.readTable(self.camp_name, "my_camp_info")
+        print(self.data)
+
+        # if data is there in table then
+        if len(self.data) != 0:
+            # set the data
+            for i in range(len(self.data)):
+                for j in range(len(self.data[i])):
+                    self.tmp_label = QLabel()
+                    self.tmp_label.setText(str(self.data[i][j]))
+                    self.tmp_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+                    self.tmp_label.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                    self.my_camp_win.gridLayout.addWidget(self.tmp_label, i + 1, j)
+            # show
+            self.my_camp_win.show()
+            print("shown")
+        else:
+            QMessageBox.critical(self, "Empty", "The table is empty!!\t")
+
+    def launch_today_view_all_window(self):
+        self.today_view_win = SysAdmin.TodayAll()
+        # get the data
+        self.data = self.admin.readTable(self.camp_name, "today_all")
+        print(self.data)
+
+        # if data is there in table then
+        if len(self.data) != 0:
+            # set the data
+            for i in range(len(self.data)):
+                for j in range(len(self.data[i])):
+                    self.tmp_label = QLabel()
+                    self.tmp_label.setText(str(self.data[i][j]))
+                    self.tmp_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+                    self.tmp_label.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                    self.today_view_win.gridLayout.addWidget(self.tmp_label, i + 1, j)
+            # show
+            self.today_view_win.show()
+            print("shown")
+        else:
+            QMessageBox.critical(self, "Empty", "The table is empty!!\t")
+
+    # -------------------------------------------------------------------------------------------------------
+
+    def setup_for_update_table_details(self):
+            self.label_1.setEnabled(True)
+            self.label_2.setEnabled(True)
+            self.label_3.setEnabled(True)
+
+            self.lineEdit.setEnabled(True)
+            self.lineEdit.clear()
+            self.lineEdit_2.setEnabled(True)
+            self.lineEdit_2.clear()
+            self.lineEdit_3.setEnabled(True)
+            self.lineEdit_3.clear()
+
+            self.pushButton_71.setEnabled(True)
+            self.pushButton_71.setText("Update")
 
 
 class SysAdminWindow(QMainWindow, SystemAdmin_UI.Ui_MainWindow):
@@ -84,7 +421,8 @@ class SysAdminWindow(QMainWindow, SystemAdmin_UI.Ui_MainWindow):
 
     # ----------------------- About -----------------------
     def about(self):
-        message = "Project RAHAT v1.0\t\t\n\nCreated By   - Suraj Singh\t\t\nDesignation - B.Tech CSE student (2nd Year)" \
+        message = "Project RAHAT v1.0\t\t\n\nCreated By   - Suraj Singh\t\t\n" \
+                  "Designation - B.Tech CSE student (2nd Year)" \
                   "\t\t\n\nContributor  - Vagish Baweja\t\t\nDesignation - B.Tech CSE student (2nd Year)\n"
         self.aboutMessage = QMessageBox.information(self, "About", message)
 
@@ -528,11 +866,16 @@ class ControllerWindow(QMainWindow):
         print("Success signal from camp_admin_window")
         self.camp_name = "camp" + self.camp_id
         try:
-            self.admin = CampAdmin(self.camp_name, self.__pswd)
+            self.admin = CampAdmin.CampAdmin(self.camp_name, self.__pswd)
         except:
-            QMessageBox.critical(self, "Error", "Wrong Password")
+            QMessageBox.critical(self, "Error", "Wrong Password!!\t\t")
             exit(-1)
         # if password is correct then Camp Admin window will pop up else exit()
+        self.win = CampAdminWindow(self.camp_name)
+        # self.win.camp_name_label.setText(self.camp_name)
+        # self.win.camp_name_label.hide()
+        del self.admin
+        self.win.showMaximized()
 
 
 app = QApplication(sys.argv)

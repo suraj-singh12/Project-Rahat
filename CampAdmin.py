@@ -2,7 +2,45 @@ from config import config
 import datetime  # for current year
 import os  # for clearing screen
 from Database import Database
+from PyQt5 import QtWidgets
+import SelectTableToRead_UI
+import MainTable2021_UI
+import NewPersonForm_UI
 
+
+class NewPerson(QtWidgets.QWidget, NewPersonForm_UI.Ui_Dialog):
+    def __init__(self):
+        super(NewPerson, self).__init__()
+        self.setupUi(self)
+        # disable injury subform (input fields)
+        self.lineEdit_7.setEnabled(False)
+        self.comboBox.setEnabled(False)
+        self.comboBox_2.setEnabled(False)
+        self.spinBox_2.setEnabled(False)
+        # disable injury subform (labels)
+        self.label_9.setEnabled(False)
+        self.label_10.setEnabled(False)
+        self.label_11.setEnabled(False)
+        self.label_12.setEnabled(False)
+        self.label_14.setEnabled(False)
+
+
+class SelectATable(QtWidgets.QWidget, SelectTableToRead_UI.Ui_Dialog):
+    def __init__(self):
+        super(SelectATable, self).__init__()
+        self.setupUi(self)
+
+
+class MainTable(QtWidgets.QMainWindow, MainTable2021_UI.Ui_MainWindow):
+    def __init__(self):
+        super(MainTable, self).__init__()
+        self.setupUi(self)
+        self.pushButton.setAutoDefault(True)
+        self.pushButton.clicked.connect(self.ok_clicked)
+
+    def ok_clicked(self):
+        # close the window
+        self.close()
 
 class CampAdmin(Database):
     """ -------- CampAdmin portal functions -------- """
@@ -83,27 +121,28 @@ class CampAdmin(Database):
     # -------------------------------------------------------------------------------------------------
 
     @staticmethod
-    def __getInjuryRecords(familyId: str, memberNo: int):
-        descr = input("Enter Injury Description: ")
-        level = input("Enter injury level (Low(L) / Normal(N) / High(H) / Critical(C)): ").upper()
+    def __getInjuryRecords(familyId: str, memberNo: int, data_ith1: tuple):
+        descr = data_ith1[0]
+        level = ''
+        if data_ith1[1] == 'Low':
+            level = 'L'
+        elif data_ith1[1] == 'Normal':
+            level = 'N'
+        elif data_ith1[1] == 'High':
+            level = 'H'
+        else:
+            level = 'C'
         # print(level)
 
-        while level not in ('L', 'N', 'H', 'C'):
-            print("Error, invalid level input. Try again, enter only one character")
-            level = input("Enter injury level (Low(L) / Normal(N) / High(H) / Critical(C)): ")
-
-        rec_init = input("Whether recovery initiated? (y/n): ").upper()
-
-        while rec_init not in ('Y', 'N'):
-            print("Error, invalid input. Try again !")
-            rec_init = input("Whether recovery initiated? (y/n): ").upper()
+        rec_init = ''
+        if data_ith1[2] == 'Yes':
+            rec_init = 'Y'
+        else:
+            rec_init = 'N'
 
         rec_perc = '0'
         if rec_init == 'Y':
-            rec_perc = input("Recovery percentage? (0-100): ")
-            while int(rec_perc) < 0 or int(rec_perc) > 100:
-                print("Error, invalid percentage. Enter percentage from [0-100]")
-                rec_perc = input("Recovery percentage? (0-100): ")
+            rec_perc = data_ith1[3]
 
         query_data = "'" + familyId + "', " + str(
             memberNo) + ", '" + descr + "', '" + level + "', '" + rec_init + "', " + rec_perc
@@ -117,41 +156,26 @@ class CampAdmin(Database):
     vill_city = ''
     loc_in_vc = ''
 
-    def __readDataForQuery(self, member_no: int):
-        os.system("cls")
+    def __readDataForQuery(self, member_no: int, data_ith: tuple):
+        # os.system("cls")
         print("Enter the below details carefully (member : {}): ".format(member_no))
+        print(data_ith)
 
         family_id = CampAdmin.new_family_id
         # member_no already received
-        name = input("Name: ")
+        name = data_ith[0][0]
 
-        age = input("Age (in years): ")
-        if (not int(age)) or int(age) > 110 or int(age) <= 0:
-            print("Error! enter a valid age: ")
-            age = input("Age (in years): ")
+        age = data_ith[0][1]
 
-        gender = input("Gender (M/F): ").upper()
-        while gender not in ('M', 'F'):
-            print("Error! invalid input, try again.")
-            gender = input("Gender (M/F): ").upper()
+        gender = data_ith[0][2]
 
-        # this will be useful later on also while querying the dbase, also it is an important aspect that must be known
-        if member_no > 1:
-            relation = input("Relation (with member 1)? (Mother/Father/Brother/Sister/Cousin): ").lower()
-            while relation not in ("mother", "father", "brother", "sister", "cousin"):
-                print("Enter a valid relation !")
-                relation = input("Relation? (Self/Mother/Father/Brother/Sister/Cousin): ")
-        else:
-            # only first member can have relation self, others are related to him somehow but not self
-            relation = "self"
+        relation = data_ith[0][3].lower()
+        if member_no == 1:
             # only family member1 will enter address, for other it is same
-            CampAdmin.vill_city = input("Village/City: ")
-            CampAdmin.loc_in_vc = input("Location in village/city: ")
+            CampAdmin.vill_city = data_ith[0][4]
+            CampAdmin.loc_in_vc = data_ith[0][5]
 
-        inCamp = input("Person will be in camp? (y/n)").upper()
-        if inCamp not in ('Y', 'N'):
-            print("Invalid input, only enter one character (y/n)")
-            inCamp = input("Person will be in camp? (y/n)").upper()
+        inCamp = data_ith[0][7].upper()
 
         joinedOn = 'null'
         leftOn = 'null'
@@ -159,17 +183,13 @@ class CampAdmin(Database):
             todayDate = str(datetime.datetime.now())[0:10]
             joinedOn = todayDate
 
-        if inCamp == 'Y':
-            injury = input("Is there any injury? (y/n)").upper()
-            while injury not in ('Y', 'N'):
-                print("Error! invalid input. Try again.")
-                injury = input("Is there any injury? (y/n)").upper()
+            injury = data_ith[0][8].upper()
         else:
             injury = '-'  # this means status unknown (for those who aren't in camp)
 
         query2 = ''
         if injury == 'Y':
-            query2 = self.__getInjuryRecords(family_id, member_no)
+            query2 = self.__getInjuryRecords(family_id, member_no, data_ith[1])
 
         # there is a minute difference between queries in if and else        
         if joinedOn != 'null':
@@ -187,42 +207,37 @@ class CampAdmin(Database):
 
     # -------------------------------------------------------------------------------------------------
 
-    def writeInto(self, campName: str):
+    def writeInto(self, campName: str, data: tuple):
         """ Insert a record in database / camp """
-        in_pass = input("Enter your password again: ")
 
-        # read passwords file (this file is on server)
-        params = config("passwords.ini", "camp_admin")
-        ac_pass = params.get(campName)
+        # connect to camp's database
+        cur, conn = self.connect(campName)
 
-        # password is not null and matches then proceed to connect 
-        if ac_pass is not None and ac_pass == in_pass:
+        # os.system("cls")
+        members = len(data)
+        queries = []
+        for member_no in range(1, members + 1):
+            queries.append(self.__readDataForQuery(member_no, data[member_no-1]))
+        print(queries)
 
-            # connect to camp's database
-            cur, conn = self.connect(campName)
-
-            os.system("cls")
-            members = int(input("Enter the number of members in family: "))
-            queries = []
-            for member_no in range(1, members + 1):
-                queries.append(self.__readDataForQuery(member_no))
-            # print(queries)
-
-            count = 0
-            for query in queries:
-                cur.execute(query[0])
+        count = 0
+        for query in queries:
+            cur.execute(query[0])
+            count += 1
+            if query[1] != '':
+                cur.execute(query[1])
                 count += 1
-                if query[1] != '':
-                    cur.execute(query[1])
-                    count += 1
-            cur.close()
-            conn.close()
-            print("Total rows affected {}\n".format(count))
+        cur.close()
+        conn.close()
+        print("Total rows affected {}\n".format(count))
 
-            print("Provide below familyId card to the person1 of family")
-            print("---------------"*5)
-            print("FamilyID: " + CampAdmin.new_family_id)
-            print("---------------" * 5)
+        print("Provide below familyId card to the person1 of family")
+        print("---------------"*5)
+        print("FamilyID: " + CampAdmin.new_family_id)
+        print("---------------" * 5)
+        message = "Provide Family Id card to the Person1 of family" + \
+                  "\n\n With ID - Family ID: " + CampAdmin.new_family_id + "\t\t"
+        return message
 
     # -------------------------------------------------------------------------------------------------
 
