@@ -354,22 +354,6 @@ class SysAdmin(Database):
 
     def deRegister_step2(self, campName):
             print("\n\n[Note: This action is irreversible and you will lose all the data of this camp]")
-
-            # consent = QtWidgets.QMessageBox()
-            # consent.setWindowTitle("Question")
-            # consent.setText("Are you sure you want to de-register this camp?")
-            # consent.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
-            # consent.exec()
-
-            # consent = input("\nAre you sure you want to de-register this camp?(y/n): ")
-            # if consent == QtWidgets.QMessageBox.Yes:
-            #     consent = 'y'
-
-            # if consent.lower() == 'y':
-                # close connection with current database
-                # cur.close()
-                # conn.close()
-                # connect to default database
             try:
                 cur, conn = self.connect()
                 # drop the desired database
@@ -446,20 +430,6 @@ class SysAdmin(Database):
         #     conn.close()
         # else:
         #     print("Error! " + campName + " is not a registered camp")
-
-    def readTable(self, campName: str, tableName: str) -> tuple:
-        """ reads a table and returns its data """
-
-        # no need to authorize, as only authorized function from app will call it
-        cur, conn = self.connect(campName)
-        cur.execute("SELECT * FROM " + tableName)
-        data = list()
-
-        for row in cur.fetchall():
-            data.append(row)
-        cur.close()
-        conn.close()
-        return tuple(data)
 
     # -----------------------------------------------------------------------------------------------------------------------------
 
