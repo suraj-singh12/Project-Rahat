@@ -10,6 +10,7 @@ import RegularSupplyTable_UI
 import MedicalSupplyTable_UI
 import TodayAll_UI
 import MyCampInfo_UI
+import AllCampDetails_UI
 
 
 class SelectATable(QtWidgets.QWidget, SelectTableToRead_UI.Ui_Dialog):
@@ -81,6 +82,18 @@ class TodayAll(QtWidgets.QMainWindow, TodayAll_UI.Ui_MainWindow):
 class MyCamp(QtWidgets.QMainWindow, MyCampInfo_UI.Ui_MainWindow):
     def __init__(self):
         super(MyCamp, self).__init__()
+        self.setupUi(self)
+        self.pushButton.setAutoDefault(True)
+        self.pushButton.clicked.connect(self.ok_clicked)
+
+    def ok_clicked(self):
+        # close the window
+        self.close()
+
+
+class AllCampDet(QtWidgets.QMainWindow, AllCampDetails_UI.Ui_MainWindow):
+    def __init__(self):
+        super(AllCampDet, self).__init__()
         self.setupUi(self)
         self.pushButton.setAutoDefault(True)
         self.pushButton.clicked.connect(self.ok_clicked)
@@ -168,6 +181,7 @@ class SysAdmin(Database):
             insertInSupportTable = "insert into " + supportTableName + " values('" + \
                                    campId + "', '" + memberName + "', '" + memberAadhar + \
                                    "', '" + memberEmail + "', '" + memberMobile + "');"
+            print(insertInSupportTable)
             cur.execute(insertInSupportTable)
 
         print("Total rows affected = {}".format(cur.rowcount))
@@ -443,6 +457,8 @@ class SysAdmin(Database):
 
         for row in cur.fetchall():
             data.append(row)
+        cur.close()
+        conn.close()
         return tuple(data)
 
     # -----------------------------------------------------------------------------------------------------------------------------
