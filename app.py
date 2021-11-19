@@ -237,6 +237,8 @@ class CampAdminWindow(QMainWindow, CampAdmin_UI.Ui_MainWindow):
                     self.tmp_label.setText(str(self.data[i][j]))
                     self.tmp_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
                     self.tmp_label.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                    self.tmp_label.setFrameShape(QFrame.Panel)
+                    self.tmp_label.setMinimumHeight(25)
                     # self.tmp_label.setMargin(0)
                     # self.tmp_label.setFont(QFont(("MS Shell Dlg 2", 8)))
                     # self.tmp_label.setStyleSheet("QLabel {background-color: red;}")
@@ -263,6 +265,8 @@ class CampAdminWindow(QMainWindow, CampAdmin_UI.Ui_MainWindow):
                     self.tmp_label.setText(str(self.data[i][j]))
                     self.tmp_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
                     self.tmp_label.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                    self.tmp_label.setFrameShape(QFrame.Panel)
+                    self.tmp_label.setMinimumHeight(25)
                     self.injury_table_win.gridLayout.addWidget(self.tmp_label, i + 1, j)
             # show
             self.injury_table_win.show()
@@ -285,6 +289,8 @@ class CampAdminWindow(QMainWindow, CampAdmin_UI.Ui_MainWindow):
                     self.tmp_label.setText(str(self.data[i][j]))
                     self.tmp_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
                     self.tmp_label.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                    self.tmp_label.setFrameShape(QFrame.Panel)
+                    self.tmp_label.setMinimumHeight(25)
                     self.regular_supply_win.gridLayout.addWidget(self.tmp_label, i + 1, j)
             # show
             self.regular_supply_win.show()
@@ -307,6 +313,8 @@ class CampAdminWindow(QMainWindow, CampAdmin_UI.Ui_MainWindow):
                     self.tmp_label.setText(str(self.data[i][j]))
                     self.tmp_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
                     self.tmp_label.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                    self.tmp_label.setFrameShape(QFrame.Panel)
+                    self.tmp_label.setMinimumHeight(25)
                     self.medical_supply_win.gridLayout.addWidget(self.tmp_label, i + 1, j)
             # show
             self.medical_supply_win.show()
@@ -329,6 +337,8 @@ class CampAdminWindow(QMainWindow, CampAdmin_UI.Ui_MainWindow):
                     self.tmp_label.setText(str(self.data[i][j]))
                     self.tmp_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
                     self.tmp_label.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                    self.tmp_label.setFrameShape(QFrame.Panel)
+                    self.tmp_label.setMinimumHeight(25)
                     self.my_camp_win.gridLayout.addWidget(self.tmp_label, i + 1, j)
             # show
             self.my_camp_win.show()
@@ -351,7 +361,9 @@ class CampAdminWindow(QMainWindow, CampAdmin_UI.Ui_MainWindow):
                     self.tmp_label.setText(str(self.data[i][j]))
                     self.tmp_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
                     self.tmp_label.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
-                    self.today_view_win.gridLayout.addWidget(self.tmp_label, i + 1, j)
+                    self.tmp_label.setFrameShape(QFrame.Panel)
+                    self.tmp_label.setMinimumHeight(25)
+                    self.today_view_win.gridLayout_2.addWidget(self.tmp_label, i + 1, j)
             # show
             self.today_view_win.show()
             print("shown")
@@ -539,6 +551,8 @@ class SysAdminWindow(QMainWindow, SystemAdmin_UI.Ui_MainWindow):
                     self.tmp_label.setText(str(self.data[i][j]))
                     self.tmp_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
                     self.tmp_label.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                    self.tmp_label.setFrameShape(QFrame.Panel)
+                    self.tmp_label.setMinimumHeight(25)
                     # self.tmp_label.setMargin(0)
                     # self.tmp_label.setFont(QFont(("MS Shell Dlg 2", 8)))
                     # self.tmp_label.setStyleSheet("QLabel {background-color: red;}")
@@ -565,6 +579,8 @@ class SysAdminWindow(QMainWindow, SystemAdmin_UI.Ui_MainWindow):
                     self.tmp_label.setText(str(self.data[i][j]))
                     self.tmp_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
                     self.tmp_label.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                    self.tmp_label.setFrameShape(QFrame.Panel)
+                    self.tmp_label.setMinimumHeight(25)
                     self.injury_table_win.gridLayout.addWidget(self.tmp_label, i + 1, j)
             # show
             self.injury_table_win.show()
@@ -587,6 +603,8 @@ class SysAdminWindow(QMainWindow, SystemAdmin_UI.Ui_MainWindow):
                     self.tmp_label.setText(str(self.data[i][j]))
                     self.tmp_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
                     self.tmp_label.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                    self.tmp_label.setFrameShape(QFrame.Panel)
+                    self.tmp_label.setMinimumHeight(25)
                     self.regular_supply_win.gridLayout.addWidget(self.tmp_label, i + 1, j)
             # show
             self.regular_supply_win.show()
@@ -609,6 +627,8 @@ class SysAdminWindow(QMainWindow, SystemAdmin_UI.Ui_MainWindow):
                     self.tmp_label.setText(str(self.data[i][j]))
                     self.tmp_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
                     self.tmp_label.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                    self.tmp_label.setFrameShape(QFrame.Panel)
+                    self.tmp_label.setMinimumHeight(25)
                     self.medical_supply_win.gridLayout.addWidget(self.tmp_label, i + 1, j)
             # show
             self.medical_supply_win.show()
@@ -631,6 +651,8 @@ class SysAdminWindow(QMainWindow, SystemAdmin_UI.Ui_MainWindow):
                     self.tmp_label.setText(str(self.data[i][j]))
                     self.tmp_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
                     self.tmp_label.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                    self.tmp_label.setFrameShape(QFrame.Panel)
+                    self.tmp_label.setMinimumHeight(25)
                     self.my_camp_win.gridLayout.addWidget(self.tmp_label, i + 1, j)
             # show
             self.my_camp_win.show()
@@ -653,7 +675,9 @@ class SysAdminWindow(QMainWindow, SystemAdmin_UI.Ui_MainWindow):
                     self.tmp_label.setText(str(self.data[i][j]))
                     self.tmp_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
                     self.tmp_label.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
-                    self.today_view_win.gridLayout.addWidget(self.tmp_label, i + 1, j)
+                    self.tmp_label.setFrameShape(QFrame.Panel)
+                    self.tmp_label.setMinimumHeight(25)
+                    self.today_view_win.gridLayout_2.addWidget(self.tmp_label, i + 1, j)
             # show
             self.today_view_win.show()
             print("shown")
