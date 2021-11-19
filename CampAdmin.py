@@ -53,9 +53,11 @@ class CampAdmin(Database):
     # -------------------------------------------------------------------------------------------------
     def __init__(self, identity, pswd):
         self.identity = identity
+        print("here")
         if not self.validate(CampAdmin.usrType, self.identity, pswd):
             print("Authentication Failed !")
             exit(-1)
+        print("semi-safe")
         self.__set_class_info(identity)
 
     def __set_class_info(self, campName: str):
@@ -66,17 +68,20 @@ class CampAdmin(Database):
         # set total no of people in camp
         query = "select count(*) from " + tableName + " where incamp = 'Y';"
         cur.execute(query)
+
         CampAdmin.total_person = int(cur.fetchone()[0])
 
         # find max family id
         query = "select max(family_id) from " + tableName + ";"
         cur.execute(query)
-        max_id = str(cur.fetchone()[0])
+        print("safe till here")
 
-        # set max+1 (new) family ID [available]
-        inc = int(max_id[3:])
-        inc = inc + 1
-        CampAdmin.new_family_id = max_id[0:3] + str(inc)
+        max_id = str(cur.fetchone()[0])
+        if max_id is not None:
+            # set max+1 (new) family ID [available]
+            inc = int(max_id[3:])
+            inc = inc + 1
+            CampAdmin.new_family_id = max_id[0:3] + str(inc)
 
         cur.close()
         conn.close()

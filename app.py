@@ -61,7 +61,9 @@ class CampAdminWindow(QMainWindow, CampAdmin_UI.Ui_MainWindow):
     def new_person_form(self):
         self.new_person_win.show()
 
+    # ---------------- writing into camp (details of a new person) --------------------------
     def toggle_recovery_percent(self):
+        # if recovery started is yes, then enable, if no the disable (toggles as options change)
         if self.new_person_win.comboBox_2.currentText() == "Yes":
             self.new_person_win.spinBox_2.setEnabled(True)
         else:
@@ -69,7 +71,7 @@ class CampAdminWindow(QMainWindow, CampAdmin_UI.Ui_MainWindow):
 
     def configure_injury_subform(self):
         print("in configure injury form")
-        print(self.new_person_win.checkBox.isChecked(), self.new_person_win.checkBox_2.isChecked())
+        # when person is in camp and has injury only then injury subform is enabled to be filled
         if self.new_person_win.checkBox.isChecked() and self.new_person_win.checkBox_2.isChecked():
             # enable injury subform (input fields)
             self.new_person_win.lineEdit_7.setEnabled(True)
@@ -96,6 +98,28 @@ class CampAdminWindow(QMainWindow, CampAdmin_UI.Ui_MainWindow):
             self.new_person_win.label_14.setEnabled(False)
 
     def check_times(self):
+        # extract form data and store in self.new_person_data
+        self.extract_data()
+
+        # then check the counter, decrement no of persons
+        self.count = int(self.new_person_win.spinBox_3.text()) - 1
+        print(self.count)
+
+        self.set_appropriate_default_1()
+
+        if self.count > 0:
+            self.new_person_form()
+        else:
+            self.new_person_win.close()
+            print("Time to send all data for final action")
+            self.response = self.admin.writeInto(self.camp_name, tuple(self.new_person_data))
+            # print(self.response)
+            QMessageBox.information(self, "Information", self.response)
+            # this will clear the data also and also the admin
+            self.set_appropriate_default_2()
+
+    # -------------------- helpers of check_times --------------------
+    def extract_data(self):
         tmpLst = list()
         tmpLst.append(self.new_person_win.lineEdit.text())
         tmpLst.append(self.new_person_win.spinBox.text())
@@ -128,15 +152,11 @@ class CampAdminWindow(QMainWindow, CampAdmin_UI.Ui_MainWindow):
         tmpLst2 = tuple(tmpLst2)
 
         print("yes till here")
-        one_packet = (tmpLst, tmpLst2)      # two tuples in single tuple (data of one person)
+        one_packet = (tmpLst, tmpLst2)  # two tuples in single tuple (data of one person)
         self.new_person_data.append(one_packet)
         print(one_packet)
-        # extract form data and store in self.new_person_data
 
-        self.count = int(self.new_person_win.spinBox_3.text()) - 1
-        # then check the counter, decrement no of persons
-        print(self.count)
-
+    def set_appropriate_default_1(self):
         self.new_person_win.spinBox_3.setEnabled(True)
         self.new_person_win.spinBox_3.setValue(self.count)
         self.new_person_win.spinBox_3.setEnabled(False)
@@ -169,16 +189,26 @@ class CampAdminWindow(QMainWindow, CampAdmin_UI.Ui_MainWindow):
         self.new_person_win.radioButton.setChecked(False)
         self.new_person_win.radioButton_2.setChecked(False)
 
-        if self.count > 0:
-            self.new_person_form()
-        else:
-            self.new_person_win = CampAdmin.NewPerson() # for the next time (it is a new window)
-            print("Time to send all data for final action")
-            self.response = self.admin.writeInto(self.camp_name, tuple(self.new_person_data))
-            # print(self.response)
-            QMessageBox.information(self, "Information", self.response)
-        # and again call new_person_form if count>0
+    def set_appropriate_default_2(self):
+        # once one family's full record is taken, clear the data from var
+        self.new_person_data = list()
+        # creating new object again (so family id etc will get updated)
+        self.admin = CampAdmin.CampAdmin(self.camp_name,self.__pswd)
+        self.new_person_win.lineEdit_4.setText("self")
+        self.new_person_win.lineEdit_4.setEnabled(False)
 
+        self.new_person_win.lineEdit_5.setEnabled(True)
+        self.new_person_win.lineEdit_5.clear()
+
+        self.new_person_win.lineEdit_6.setEnabled(True)
+        self.new_person_win.lineEdit_6.clear()
+
+        self.new_person_win.spinBox_3.setEnabled(True)
+
+        self.new_person_win.lineEdit.setFocus()
+    # -------------------- -------------------- -------------------- --------------------
+
+    # ---------------- ---------------- ---------------- ---------------- ---------------- ----------------
     def exit_now(self):
         exit(0)
 
@@ -840,7 +870,7 @@ class ControllerWindow(QMainWindow):
         self.which_portal = self.portal_selector.comboBox.currentIndex()
         self.__pswd = self.portal_selector.lineEdit_2.text()
         self.camp_id = self.portal_selector.lineEdit.text()
-        # print(self.which_portal, self.__pswd, self.camp_id)
+        print(self.which_portal, self.__pswd, self.camp_id)
         self.portal_selector.close()
 
         # proceed according to portal choice
@@ -865,6 +895,7 @@ class ControllerWindow(QMainWindow):
     def camp_admin_window(self):
         print("Success signal from camp_admin_window")
         self.camp_name = "camp" + self.camp_id
+        print(self.camp_name)
         try:
             self.admin = CampAdmin.CampAdmin(self.camp_name, self.__pswd)
         except:
