@@ -3693,6 +3693,9 @@
     <property name="text">
      <string>OK</string>
     </property>
+    <property name="autoDefault">
+     <bool>true</bool>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
