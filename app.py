@@ -43,6 +43,18 @@ class CampAdminWindow(QMainWindow, CampAdmin_UI.Ui_MainWindow):
         self.new_person_win.lineEdit_4.setText("self")
         self.new_person_win.lineEdit_4.setEnabled(False)
 
+        self.pushButton_3.clicked.connect(self.enable_update_fields)
+        self.pushButton_71.clicked.connect(self.person_details_update_form)
+        self.details_update_win = CampAdmin.UpdatePerson()
+        # self.details_update_win.pushButton.clicked.connect(self.update_the_details)
+
+        self.pushButton_5.clicked.connect(self.ask_district)
+        self.resource_type_win = CampAdmin.ResourceType()
+        # self.medical_res_win = CampAdmin.MedicalResource()
+        # self.regular_res_win = CampAdmin.RegularResource()
+        self.pushButton_72.clicked.connect(self.resource_type_select)
+        self.resource_type_win.pushButton_2.clicked.connect(self.launch_appropriate_res_table)
+
         self.new_person_win.checkBox.clicked.connect(self.configure_injury_subform)
         self.new_person_win.checkBox_2.clicked.connect(self.configure_injury_subform)
         self.new_person_win.comboBox_2.currentIndexChanged.connect(self.toggle_recovery_percent)
@@ -60,6 +72,134 @@ class CampAdminWindow(QMainWindow, CampAdmin_UI.Ui_MainWindow):
 
     def new_person_form(self):
         self.new_person_win.show()
+
+    def ask_district(self):
+        self.label_4.setEnabled(True)
+        self.lineEdit_4.setEnabled(True)
+        self.lineEdit_4.clear()
+        self.lineEdit_4.setFocus()
+        self.pushButton_72.setEnabled(True)
+        self.pushButton_72.setText("Find...")
+        self.pushButton_72.setAutoDefault(True)
+
+    def resource_type_select(self):
+        self.label_4.setEnabled(False)
+        self.lineEdit_4.setEnabled(False)
+        self.pushButton_72.setText("Disabled")
+        self.pushButton_72.setEnabled(False)
+
+        self.resource_type_win.lineEdit.setFocus()
+        self.resource_type_win.lineEdit.clear()
+        self.resource_type_win.pushButton.setAutoDefault(True)
+        self.resource_type_win.pushButton_2.setAutoDefault(True)
+        self.resource_type_win.show()
+
+    def launch_appropriate_res_table(self):
+        # close type select form
+        self.resource_type_win.close()
+        # both type table create (will see which reqd)
+        self.regular_res_win = CampAdmin.RegularResource()
+        self.medical_res_win = CampAdmin.MedicalResource()
+
+        district = self.lineEdit_4.text()
+        item_name = self.resource_type_win.lineEdit.text().lower()
+        item_type = self.resource_type_win.comboBox.currentText().lower()
+        # print(item_type)
+        if item_type not in ("medical", "regular"):
+            print("Please select a type")
+            QMessageBox.critical(self, "Error", "Please select a type!!")
+            return
+        # resetting the type select form
+        self.resource_type_win.pushButton.click()
+        self.resource_type_win.comboBox.setCurrentIndex(0)
+        # print("Before calling readItemAvail()")
+
+        # get the data
+        self.data = self.admin.readItemAvailability(district, item_name, item_type)
+        print(self.data)
+
+        # if data is there in table then
+        if len(self.data) != 0:
+            # set the data
+            for i in range(len(self.data)):
+                for j in range(len(self.data[i])):
+                    self.tmp_label = QLabel()
+                    self.tmp_label.setText(str(self.data[i][j]))
+                    self.tmp_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+                    self.tmp_label.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                    self.tmp_label.setFrameShape(QFrame.Panel)
+                    self.tmp_label.setMinimumHeight(25)
+                    if item_type == "regular":
+                        self.regular_res_win.gridLayout.addWidget(self.tmp_label, i + 1, j)
+                    elif item_type == "medical":
+                        self.medical_res_win.gridLayout.addWidget(self.tmp_label, i + 1, j)
+            # show
+            if item_type == "regular":
+                self.regular_res_win.show()
+            else:
+                self.medical_res_win.show()
+            print("shown")
+        else:
+            QMessageBox.critical(self, "Empty", "Nothing found in this district!!\t")
+
+    # ---------------- for updating details of a person -------------------------------------
+
+
+    def enable_update_fields(self):
+        self.lineEdit.setEnabled(True)
+        self.lineEdit.clear()
+        self.lineEdit.setFocus()
+        self.lineEdit_2.setEnabled(True)
+        self.lineEdit_2.clear()
+        # self.lineEdit_3.setEnabled(True)
+        self.label_1.setEnabled(True)
+        self.label_2.setEnabled(True)
+        self.pushButton_71.setEnabled(True)
+        self.pushButton_71.autoDefault()
+        self.pushButton_71.setText("Update...")
+
+    def person_details_update_form(self):
+        family_id = self.lineEdit.text()
+        member_no = self.lineEdit_2.text()
+        if family_id == '' or member_no == '':
+            QMessageBox.critical(self, "Error", "Family ID or Member No can't be empty!!")
+        else:
+            self.details_update_win.comboBox.setCurrentIndex(0)
+            self.details_update_win.pushButton_2.click()
+            self.details_update_win.show()
+
+    def update_the_details(self):
+        self.details_update_win.close()
+        self.lineEdit.setEnabled(False)
+        self.lineEdit_2.setEnabled(False)
+        self.label_1.setEnabled(False)
+        self.label_2.setEnabled(False)
+        family_id = self.lineEdit.text()
+        member_no = self.lineEdit_2.text()
+        injury = self.details_update_win.comboBox.currentText()
+        if 'Select' not in injury:
+            injury = injury[0]
+            injury_status = self.details_update_win.spinBox.text()
+        else:
+            injury = '-'
+            injury_status = '-'
+
+        leaving_today = self.details_update_win.checkBox.isChecked()
+        if leaving_today:
+            leaving_today = 'Y'
+        else:
+            leaving_today = 'N'
+
+        print("Before setting data")
+        self.data = [family_id, member_no, injury, injury_status, leaving_today]
+        self.data = tuple(self.data)
+        print("printing the data")
+        print(self.data)
+        self.response = self.admin.updateDetails(self.camp_name, self.data)
+        if self.response.startswith('Error!'):
+            QMessageBox.critical(self, "Error", self.response)
+        else:
+            QMessageBox.information(self, "Information", self.response)
 
     # ---------------- writing into camp (details of a new person) --------------------------
     def toggle_recovery_percent(self):
@@ -211,7 +351,7 @@ class CampAdminWindow(QMainWindow, CampAdmin_UI.Ui_MainWindow):
     # ---------------- ---------------- ---------------- ---------------- ---------------- ----------------
     def exit_now(self):
         exit(0)
-
+    # ------------------------ for reading tables ------------------------
     def read_my_tables(self):
         self.select_table = CampAdmin.SelectATable()
         self.select_table.pushButton.clicked.connect(self.launch_main_table_window)

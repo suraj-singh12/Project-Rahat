@@ -6,6 +6,10 @@ from PyQt5 import QtWidgets
 import SelectTableToRead_UI
 import MainTable2021_UI
 import NewPersonForm_UI
+import UpdateDetailsPerson_UI
+import WhichResource_UI
+import RegularResourceAvailibility_UI
+import MedicalResourceAvailibility_UI
 
 
 class NewPerson(QtWidgets.QWidget, NewPersonForm_UI.Ui_Dialog):
@@ -23,6 +27,44 @@ class NewPerson(QtWidgets.QWidget, NewPersonForm_UI.Ui_Dialog):
         self.label_11.setEnabled(False)
         self.label_12.setEnabled(False)
         self.label_14.setEnabled(False)
+
+
+class UpdatePerson(QtWidgets.QWidget, UpdateDetailsPerson_UI.Ui_Dialog):
+    def __init__(self):
+        super(UpdatePerson, self).__init__()
+        self.setupUi(self)
+
+
+class ResourceType(QtWidgets.QWidget, WhichResource_UI.Ui_Dialog):
+    def __init__(self):
+        super(ResourceType, self).__init__()
+        self.setupUi(self)
+
+
+class MedicalResource(QtWidgets.QWidget, MedicalResourceAvailibility_UI.Ui_Dialog):
+    def __init__(self):
+        super(MedicalResource, self).__init__()
+        self.setupUi(self)
+        self.pushButton.setFocus()
+        self.pushButton.setAutoDefault(True)
+        self.pushButton.clicked.connect(self.ok_clicked)
+
+    def ok_clicked(self):
+        # close the window
+        self.close()
+
+
+class RegularResource(QtWidgets.QWidget, RegularResourceAvailibility_UI.Ui_Dialog):
+    def __init__(self):
+        super(RegularResource, self).__init__()
+        self.setupUi(self)
+        self.pushButton.setFocus()
+        self.pushButton.setAutoDefault(True)
+        self.pushButton.clicked.connect(self.ok_clicked)
+
+    def ok_clicked(self):
+        # close the window
+        self.close()
 
 
 class SelectATable(QtWidgets.QWidget, SelectTableToRead_UI.Ui_Dialog):
@@ -53,11 +95,11 @@ class CampAdmin(Database):
     # -------------------------------------------------------------------------------------------------
     def __init__(self, identity, pswd):
         self.identity = identity
-        print("here")
+        # print("here")
         if not self.validate(CampAdmin.usrType, self.identity, pswd):
             print("Authentication Failed !")
             exit(-1)
-        print("semi-safe")
+        # print("semi-safe")
         self.__set_class_info(identity)
 
     def __set_class_info(self, campName: str):
@@ -74,7 +116,7 @@ class CampAdmin(Database):
         # find max family id
         query = "select max(family_id) from " + tableName + ";"
         cur.execute(query)
-        print("safe till here")
+        # print("safe till here")
 
         max_id = str(cur.fetchone()[0])
         if max_id is not None:
@@ -246,35 +288,32 @@ class CampAdmin(Database):
 
     # -------------------------------------------------------------------------------------------------
 
-    def updateDetails(self, campName):
+    def updateDetails(self, campName, data: tuple):
         """ update details of a person """
-
+        message = ''
+        print("Inside UpdateDetails")
         # connect to camp's database
         cur, conn = self.connect(campName)
-        os.system("cls")
+        # os.system("cls")
 
-        # ------------------- Menu -------------------
-        print("1. Update injury status of person in camp")
-        print("2. Update leftOn date for a person who is leaving the camp")
-        cat = input("Which category to update?(1/2) ")
-        while cat not in ('1', '2'):
-            print("\n\nEnter a valid choice")
-            cat = input("Which category to update?(1/2) ")
+        # # ------------------- Menu -------------------
+        # print("1. Update injury status of person in camp")
+        # print("2. Update leftOn date for a person who is leaving the camp")
+        # cat = input("Which category to update?(1/2) ")
+        # while cat not in ('1', '2'):
+        #     print("\n\nEnter a valid choice")
+        #     cat = input("Which category to update?(1/2) ")
         # ------------------- ------------------- -----
 
         # get basic input to identify the person
-        familyId = input("\nEnter family ID: ")
-        while familyId == '':
-            familyId = input("\nEnter family ID: ")
-        memberNo = input("Enter member no: ")
-        while memberNo == '':
-            memberNo = input("Enter member no: ")
+        familyId = data[0]
+        memberNo = data[1]
         # table names
         mainTable = "main_table" + CampAdmin.thisYear
         injuryTable = "injury_table" + CampAdmin.thisYear
 
         # ------------------- Menu functions -------------------
-        if cat == '1':
+        if data[2] != '-':      # that means person has some injury
             # first find whether the person recognised by (familyId, memberNo) is having injury or not
             query = "select name from " + mainTable + \
                     " where family_id='" + familyId + "' and member_no=" + memberNo + \
@@ -284,40 +323,32 @@ class CampAdmin(Database):
             # if no injury then return
             if cur.rowcount == 0:
                 print("Error!, can't set level as injury is set to NO for the person.")
-                return
+                message += "couldn't set injury level as injury is set to NO for the person.\n"
+            else:
+                # if injury is there, then print the person name
+                # os.system("cls")
+                # print("Found this record -\n")
+                # for row in cur.fetchall():
+                #     print(row)
+                # print()
+                # ------------------- get injury details -------------------
+                print("Injury levels: Low(L), Normal(N), High(H), Critical(C)")
+                injuryLevel = data[2]
+                recoveryPercentage = data[3]
+                # ------------------- ------------------- -------------------
 
-            # if injury is there, then print the person name
-            os.system("cls")
-            print("Found this record -\n")
-            for row in cur.fetchall():
-                print(row)
-            print()
+                # update the database with new details
+                query = "update " + injuryTable + \
+                    " set injury_level='" + injuryLevel + "', " + \
+                    "recovery_initiated='Y', recovery_percent=" + recoveryPercentage + " " + \
+                    "where family_id='" + familyId + "' and member_no=" + memberNo + ";"
 
-            # ------------------- get injury details -------------------
-            print("Injury levels: Low(L), Normal(N), High(H), Critical(C)")
-            injuryLevel = input("Enter injury level: (L/N/H/C): ").upper()
-            while injuryLevel not in ('L', 'N', 'H', 'C'):
-                print("Incorrect input, try again!")
-                injuryLevel = input("Enter injury level: (L/N/H/C): ").upper()
+                cur.execute(query)
+                print("Total rows affected: {}".format(cur.rowcount))
+                message += 'Injury records updated\n'
+                # ------------------- END -------------------
 
-            recoveryPercentage = input("Enter recovery percentage: ")
-            while (not recoveryPercentage.isdigit()) or int(recoveryPercentage) > 100 or int(recoveryPercentage) < 0:
-                print("Invalid input, Enter a value in [0,100] range")
-                recoveryPercentage = input("Enter recovery percentage: ")
-            # ------------------- ------------------- -------------------
-
-            # update the database with new details
-            query = "update " + injuryTable + \
-                " set injury_level='" + injuryLevel + "', " + \
-                "recovery_initiated='Y', recovery_percent=" + recoveryPercentage + " " + \
-                "where family_id='" + familyId + "' and member_no=" + memberNo + ";"
-
-            cur.execute(query)
-            print("Total rows affected: {}".format(cur.rowcount))
-            # ------------------- END -------------------
-
-        # ------------------- if the cat = '2' (i.e. choice category = 2) -------------------
-        else:
+        if data[4] == 'Y':      # means Leaving Today is checked
             query = "select name, joinedon, lefton from " + mainTable + " where family_id='" + familyId + \
                 "' and member_no=" + memberNo + " and joinedon is not null and lefton is null;"
             cur.execute(query)
@@ -326,27 +357,29 @@ class CampAdmin(Database):
             if cur.rowcount == 0:
                 print("Error! The person is either not in camp or has already left")
                 print("Exiting...")
-                return
+                # override message with error message
+                message = 'Error! Person not in Camp!!\t\t'
+                return message
 
             # else proceed
             print("Matching records: ")
             for row in cur.fetchall():
                 print(row)
 
-            consent = input("Proceed?(y/n) ").lower()
+            # get today's date
+            leavingDate = str(datetime.datetime.now())[0:10]
 
-            if consent == 'y':
-                # get today's date
-                leavingDate = str(datetime.datetime.now())[0:10]
+            updateQuery = "update " + mainTable + " set lefton ='" + leavingDate + "'" + \
+                " where family_id='" + familyId + "' and member_no=" + memberNo + ";"
+            cur.execute(updateQuery)
 
-                updateQuery = "update " + mainTable + " set lefton ='" + leavingDate + "'" + \
-                    " where family_id='" + familyId + "' and member_no=" + memberNo + ";"
-                cur.execute(updateQuery)
-
-                if cur.rowcount == 1:
-                    print("Success !")
-                else:
-                    print("An error occurred! please try again")
+            if cur.rowcount == 1:
+                print("Success !")
+                message += '\nleaving Date successfully updated!\n Person leaves Today.'
+            else:
+                print("An error occurred! please try again")
+                message += 'Could not update leaving date!!'
+        return message
 
     # -------------------------------------------------------------------------------------------------
 
@@ -411,25 +444,26 @@ class CampAdmin(Database):
 
     # -------------------------------------------------------------------------------------------------
 
-    def readItemAvailability(self):
+    def readItemAvailability(self, district, item, itm_type):
         """ find if an item is available in any camp [in a given district] """
-        item = input("Enter item name: ")
-        itm_type = input("Enter item type (regular(r)/medical(m)): ")
-        while itm_type not in ('r', 'm'):
-            print("Error, invalid input! ")
-            itm_type = input("Enter item type (regular(r)/medical(m)): ")
+        # item = input("Enter item name: ")
+        # itm_type = input("Enter item type (regular(r)/medical(m)): ")
+        # while itm_type not in ('r', 'm'):
+        #     print("Error, invalid input! ")
+        #     itm_type = input("Enter item type (regular(r)/medical(m)): ")
 
-        district = input("Enter district: ")
-        # set item type accordingly
-        if itm_type == 'r':
-            itm_type = "regular"
-        else:
-            itm_type = "medical"
+        # district = input("Enter district: ")
+        # # set item type accordingly
+        # if itm_type == 'r':
+        #     itm_type = "regular"
+        # else:
+        #     itm_type = "medical"
 
         # get a list of all databases (camps, other default db)
+        print("in readItemAvail()")
         db_list = self.listAllDatabases()
 
-        os.system("cls")
+        # os.system("cls")
         # print relevant header
         if itm_type == "medical":
             header = "(campName, district, city_or_village, item_name, item_type, description, age_groups, qty)\n"
@@ -438,10 +472,11 @@ class CampAdmin(Database):
         print(header)
 
         availCampList = list()
+        data = list()
         for campName in db_list:
             if campName[0:4] == 'camp':  # if it is a camp only then proceed
                 cur, conn = self.connect(str(campName))
-                # initial check to ensure camp is from same district
+                # initial check to ensure camp is from same district and same year
                 checkQuery = "select district, city_or_village from my_camp_info where district ilike '" + \
                              district + "' and year = '" + CampAdmin.thisYear + "';"
                 cur.execute(checkQuery)
@@ -459,6 +494,7 @@ class CampAdmin(Database):
                     # query to find the item
                     query = "select * from " + tableName + " where item_name ilike '%" + item + "%';"
                     cur.execute(query)
+                    print(query)
 
                     # if query result is not empty
                     if cur.rowcount > 0:
@@ -470,11 +506,11 @@ class CampAdmin(Database):
                             row.insert(1, district)
                             row.insert(2, city_or_vill)
                             row = tuple(row)
+                            data.append(row)
                             # print the updated row
                             print(row)
                         print()
-
-        return availCampList
+        return data
 
     # -------------------------------------------------------------------------------------------------
 
