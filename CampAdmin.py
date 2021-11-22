@@ -10,6 +10,7 @@ import UpdateDetailsPerson_UI
 import WhichResource_UI
 import RegularResourceAvailibility_UI
 import MedicalResourceAvailibility_UI
+import RequestSupply_UI
 
 
 class NewPerson(QtWidgets.QWidget, NewPersonForm_UI.Ui_Dialog):
@@ -27,6 +28,22 @@ class NewPerson(QtWidgets.QWidget, NewPersonForm_UI.Ui_Dialog):
         self.label_11.setEnabled(False)
         self.label_12.setEnabled(False)
         self.label_14.setEnabled(False)
+
+
+class RequestSupply(QtWidgets.QWidget, RequestSupply_UI.Ui_RequestSupplyPopup):
+    def __init__(self):
+        super(RequestSupply, self).__init__()
+        self.setupUi(self)
+        # self.submit_pushButton.setFocus()
+        self.pushButton_submit.setAutoDefault(True)
+        self.pushButton_reset.setAutoDefault(True)
+        self.pushButton_reset.clicked.connect(self.reset)
+
+    def reset(self):
+        self.lineEdit_item_name.clear()
+        self.lineEdit_item_desc.clear()
+        self.comboBox_item_type.setCurrentIndex(0)
+        self.spinbox_quantity.setValue(0)
 
 
 class UpdatePerson(QtWidgets.QWidget, UpdateDetailsPerson_UI.Ui_Dialog):
@@ -561,28 +578,17 @@ class CampAdmin(Database):
         print()
 
     # -------------------------------------------------------------------------------------------------
-    def requestSupplyFromMain(self, campName):
+    def requestSupplyFromMain(self, campName, data: tuple):
         """ send supply request to govt(sysAdmin) team """
 
         campId = campName[4:]
         # get item details
-        itmName = input("Enter item name: ")
-        while len(itmName) < 2:
-            print("Enter a valid item name !!")
-            itmName = input("Enter item name: ")
+        itmName = data[0].lower()
 
-        itmType = input("Enter item type (regular(r)/medical(m)): ")
-        while itmType not in ('r', 'm'):
-            print("Error, try again. Enter only single character (r,m)")
-            itmType = input("Enter item type (regular(r)/medical(m)): ")
+        itmType = data[1].lower()
 
-        if itmType == 'r':
-            itmType = "regular"
-        else:
-            itmType = "medical"
-
-        itmDescription = input("Enter item description: ")
-        qty = input("Enter quanity of item required: ")
+        itmDescription = data[2]
+        qty = data[3]
 
         # demand table
         tableName = "demand" + CampAdmin.thisYear
@@ -593,15 +599,17 @@ class CampAdmin(Database):
         cur, conn = self.connect("all_camp_details")
         cur.execute(query)  # make the demand (insert the demand in table)
 
-        if cur.rowcount == 1:
+        rowcount = cur.rowcount
+        cur.close()
+        conn.close()
+        if rowcount == 1:
             print("Request Successfully submitted.")
+            return "Request Successfully submitted."
         else:
             print("There was an ERROR in submission of report !!")
             print("Try again...")
+            return "There was an ERROR in submission of report !!"
         print()
-
-        cur.close()
-        conn.close()
 
     # -------------------------------------------------------------------------------------------------
 
