@@ -25,7 +25,7 @@ class CampAdminWindow(QMainWindow, CampAdmin_UI.Ui_camp_admin):
         self.pushButton_fId_mNo_mName.setEnabled(False)
         self.pushButton_district_itmTyp.setText("Disabled")
         self.pushButton_district_itmTyp.setEnabled(False)
-        print("2")
+
         # disable labels
         self.label_family_id.setEnabled(False)
         self.label_member_no.setEnabled(False)
@@ -61,6 +61,12 @@ class CampAdminWindow(QMainWindow, CampAdmin_UI.Ui_camp_admin):
         self.supply_rqst_dlg = CampAdmin.RequestSupply()
         self.supply_rqst_dlg.pushButton_submit.clicked.connect(self.make_supply_request)
 
+        self.pushButton_update_supply.clicked.connect(self.launch_update_supply_dialog)
+        self.update_supply_dlg = CampAdmin.UpdateSupply()
+        self.update_supply_dlg.pushButton_submit.clicked.connect(self.make_supply_update)
+
+        self.pushButton_find_vacancies.clicked.connect(self.get_district)
+
         self.new_person_win.checkBox.clicked.connect(self.configure_injury_subform)
         self.new_person_win.checkBox_2.clicked.connect(self.configure_injury_subform)
         self.new_person_win.comboBox_2.currentIndexChanged.connect(self.toggle_recovery_percent)
@@ -68,19 +74,70 @@ class CampAdminWindow(QMainWindow, CampAdmin_UI.Ui_camp_admin):
         self.new_person_win.pushButton.clicked.connect(self.check_times)
 
         self.pushButton_today_view_all.clicked.connect(self.launch_today_view_all_window)
-        print("here")
         self.pushButton_exit.clicked.connect(self.exit_now)
-        print("here2")
 
         # initialize the object
         self.camp_name = camp_name
-        print(self.camp_name)
+        # print(self.camp_name)
         self.__pswd = "IamCampAdmin88"
         self.admin = CampAdmin.CampAdmin(self.camp_name, self.__pswd)
 
     def new_person_form(self):
         self.new_person_win.show()
 
+    def get_district(self):
+        self.ask_district()
+        self.pushButton_district_itmTyp.setText('find..')
+
+    def find_vacancies(self):
+        print("in findvacancies")
+        district = self.lineEdit_district_name.text().lower()
+        self.data = self.admin.findVacancies(district)
+
+        if type(self.data) is not list and 'error' in self.data.lower():
+            QMessageBox.critical(self, "Error", self.data)
+        elif len(self.data) == 0:
+            QMessageBox.information(self, "Information", "Nothing found in this district!!\t")
+        else:
+            self.vacancies_win = CampAdmin.VacanciesInCamp()
+            # if data is there in table then
+            for i in range(len(self.data)):
+                for j in range(len(self.data[i])):
+                    self.tmp_label = QLabel()
+                    self.tmp_label.setText(str(self.data[i][j]))
+                    self.tmp_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+                    self.tmp_label.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                    self.tmp_label.setFrameShape(QFrame.Panel)
+                    self.tmp_label.setMinimumHeight(25)
+                    self.vacancies_win.gridLayout.addWidget(self.tmp_label, i + 1, j)
+            # show
+            self.vacancies_win.show()
+
+    # ------------------ update/add supply items in camp records --------
+    def launch_update_supply_dialog(self):
+        print("launching update supply dlg")
+        self.update_supply_dlg.show()
+
+    def make_supply_update(self):
+        print("Marking supply updates")
+        self.update_supply_dlg.close()
+        itm_name = self.update_supply_dlg.lineEdit_item_name.text()
+        category = self.update_supply_dlg.comboBox_category.currentText().lower()
+        age_grp = self.update_supply_dlg.comboBox_age_group.currentText().lower()
+        itm_type = self.update_supply_dlg.lineEdit_item_type.text().lower()
+        itm_desc = self.update_supply_dlg.lineEdit_item_description.text().lower()
+        itm_qty = self.update_supply_dlg.spinBox_quantity.text()
+
+        data = (itm_name, category, age_grp, itm_type, itm_desc, itm_qty)
+        self.response = self.admin.updateSupplyData(self.camp_name, data)
+        print(self.response)
+        self.update_supply_dlg.pushButton_reset.click()
+        if "error" not in self.response.lower():
+            QMessageBox.information(self, "Information", self.response)
+        else:
+            QMessageBox.critical(self, "Error", self.response)
+
+    # ------------------ For item supply request --------------------------
     def launch_supply_dialog(self):
         print("launch supply dialog")
         self.supply_rqst_dlg.show()
@@ -101,7 +158,6 @@ class CampAdminWindow(QMainWindow, CampAdmin_UI.Ui_camp_admin):
         # clear the form
         self.supply_rqst_dlg.pushButton_reset.click()
 
-
     # --------------- For finding resource availability -----------------
 
     def ask_district(self):
@@ -114,16 +170,21 @@ class CampAdminWindow(QMainWindow, CampAdmin_UI.Ui_camp_admin):
         self.pushButton_district_itmTyp.setAutoDefault(True)
 
     def resource_type_select(self):
-        self.label_4.setEnabled(False)
+        button_is = self.pushButton_district_itmTyp.text()
+        self.label_district_name.setEnabled(False)
         self.lineEdit_district_name.setEnabled(False)
         self.pushButton_district_itmTyp.setText("Disabled")
         self.pushButton_district_itmTyp.setEnabled(False)
-
-        self.resource_type_win.lineEdit.setFocus()
-        self.resource_type_win.lineEdit.clear()
-        self.resource_type_win.pushButton.setAutoDefault(True)
-        self.resource_type_win.pushButton_2.setAutoDefault(True)
-        self.resource_type_win.show()
+        print(button_is)
+        if button_is == "Find...":
+            self.resource_type_win.lineEdit.setFocus()
+            self.resource_type_win.lineEdit.clear()
+            self.resource_type_win.pushButton.setAutoDefault(True)
+            self.resource_type_win.pushButton_2.setAutoDefault(True)
+            self.resource_type_win.show()
+        else:
+            print("in final or res_type_sel")
+            self.find_vacancies()
 
     def launch_appropriate_res_table(self):
         # close type select form

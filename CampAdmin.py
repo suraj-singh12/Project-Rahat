@@ -11,6 +11,8 @@ import WhichResource_UI
 import RegularResourceAvailibility_UI
 import MedicalResourceAvailibility_UI
 import RequestSupply_UI
+import UpdateSupplyData_UI
+import VacanciesInCamps_UI
 
 
 class NewPerson(QtWidgets.QWidget, NewPersonForm_UI.Ui_Dialog):
@@ -44,6 +46,58 @@ class RequestSupply(QtWidgets.QWidget, RequestSupply_UI.Ui_RequestSupplyPopup):
         self.lineEdit_item_desc.clear()
         self.comboBox_item_type.setCurrentIndex(0)
         self.spinbox_quantity.setValue(0)
+
+
+class VacanciesInCamp(QtWidgets.QWidget, VacanciesInCamps_UI.Ui_Dialog):
+    def __init__(self):
+        super(VacanciesInCamp, self).__init__()
+        self.setupUi(self)
+        self.pushButton_ok.setFocus()
+        self.pushButton_ok.setAutoDefault(True)
+        self.pushButton_ok.clicked.connect(self.ok_pressed)
+
+    def ok_pressed(self):
+        # close the window
+        self.close()
+
+
+class UpdateSupply(QtWidgets.QWidget, UpdateSupplyData_UI.Ui_UpdateSupplyDataPopup):
+    def __init__(self):
+        super(UpdateSupply, self).__init__()
+        self.setupUi(self)
+        self.lineEdit_item_name.setFocus()
+        self.pushButton_reset.setAutoDefault(True)
+        self.pushButton_submit.setAutoDefault(True)
+        self.pushButton_reset.clicked.connect(self.reset)
+
+        self.label_age_groups.setEnabled(False)
+        self.comboBox_age_group.setEnabled(False)
+        self.label_item_type.setEnabled(False)
+        self.lineEdit_item_type.setEnabled(False)
+        self.comboBox_category.currentIndexChanged.connect(self.toggle_age_itm_type)
+
+    def toggle_age_itm_type(self):
+        if self.comboBox_category.currentText().lower() == 'medical':
+            self.label_age_groups.setEnabled(True)
+            self.comboBox_age_group.setEnabled(True)
+            self.label_item_type.setEnabled(True)
+            self.lineEdit_item_type.setEnabled(True)
+        else:
+            self.label_age_groups.setEnabled(False)
+            self.comboBox_age_group.setEnabled(False)
+            self.comboBox_age_group.setCurrentIndex(0)
+            self.label_item_type.setEnabled(False)
+            self.lineEdit_item_type.setEnabled(False)
+            self.lineEdit_item_type.clear()
+
+    def reset(self):
+        self.lineEdit_item_name.clear()
+        self.comboBox_category.setCurrentIndex(0)
+        self.comboBox_age_group.setCurrentIndex(0)
+        self.lineEdit_item_type.clear()
+        self.lineEdit_item_description.clear()
+        self.lineEdit_item_description.clear()
+        self.spinBox_quantity.setValue(0)
 
 
 class UpdatePerson(QtWidgets.QWidget, UpdateDetailsPerson_UI.Ui_Dialog):
@@ -400,15 +454,18 @@ class CampAdmin(Database):
 
     # -------------------------------------------------------------------------------------------------
 
-    def findVacancies(self):
+    def findVacancies(self, district):
         """ find vacancies in other camps, and carry people there after informing the camp admin """
-        district = input("Enter your district: ")
+        # district = input("Enter your district: ")
+        print("reached target")
 
         cur, conn = self.connect("all_camp_details")
+
+        # find all the databases which are not full
         tableName = "campdet" + CampAdmin.thisYear
-        query = "select camp_id, camp_admin, email, phone," + \
+        query = "select camp_name, camp_admin, email, mobile," + \
                 "district, city_or_village, total_camp_capacity from " + tableName + \
-                " where capacity_full = 'N' and district = '" + district + "';"
+                " where capacity_full = 'N' and district ilike '" + district + "';"
         cur.execute(query)
 
         campDict = {}
@@ -416,8 +473,10 @@ class CampAdmin(Database):
             campDict[str(details[0])] = [details[1], details[2], details[3], details[4], details[5], details[6]]
         cur.close()
         conn.close()
+        print(campDict)
 
         rowcount = 0
+        # in each camp find total no of people who are in camp, so total vacancies can be found for each camp
         for campName in campDict.keys():
             # connect to each db one by one
             cur, conn = self.connect(str(campName))
@@ -425,56 +484,31 @@ class CampAdmin(Database):
             tableName = "main_table" + CampAdmin.thisYear
             query_total = "select count(*) from " + tableName + " where incamp = 'Y';"
             cur.execute(query_total)
+
             rowcount = cur.rowcount
-            total = int(cur.fetchone()[0])
+            total_in = int(cur.fetchone()[0])
 
             values = campDict[campName]
             # now we have vacancy count in index 5 instead of total_capacity
-            values[5] = int(values[5]) - total
+            values[5] = int(values[5]) - total_in
             # print(campDict[campName])
-
             cur.close()
             conn.close()
 
-        os.system("cls")
-        if rowcount == 0:
-            print("------------------------------------------------------------------")
-            print("Nothing found for this district (kindly check the spelling once)")
-            print("------------------------------------------------------------------")
-            return
-        else:
-            print(
-                '''--------------------------------------------------
-                ------------------------------------------------------------------------''')
-            header = "campName\t Admin\t Email\t\t\t Phone\t\t District    city_or_village    vacancy"
-            print(header)
+        final_list  = []
+        for campName in campDict.keys():
+            if campDict[campName][5] != 0:
+                append_this = campDict[campName]
+                append_this.insert(0, campName)
+                final_list.append(append_this)
+        print(final_list)
 
-            # print camp info and vacancies
-            for campName in campDict.keys():
-                print(campName, end="\t")
-                for itms in campDict[campName]:
-                    print(itms, end="\t")
-                print()
-            print(
-                '''--------------------------------------------------
-                                ------------------------------------------------------------------------''')
+        return final_list
 
     # -------------------------------------------------------------------------------------------------
 
     def readItemAvailability(self, district, item, itm_type):
         """ find if an item is available in any camp [in a given district] """
-        # item = input("Enter item name: ")
-        # itm_type = input("Enter item type (regular(r)/medical(m)): ")
-        # while itm_type not in ('r', 'm'):
-        #     print("Error, invalid input! ")
-        #     itm_type = input("Enter item type (regular(r)/medical(m)): ")
-
-        # district = input("Enter district: ")
-        # # set item type accordingly
-        # if itm_type == 'r':
-        #     itm_type = "regular"
-        # else:
-        #     itm_type = "medical"
 
         # get a list of all databases (camps, other default db)
         print("in readItemAvail()")
@@ -613,58 +647,49 @@ class CampAdmin(Database):
 
     # -------------------------------------------------------------------------------------------------
 
-    def updateSupplyData(self, campName: str):
+    def updateSupplyData(self, campName: str, data: tuple):
         """ add/update the supply records in camp """
-        os.system("cls")
-        # menu
-        print("1. Add a new item in records")
-        print("2. Update an already existing item")
-        print("0 to exit.")
-        wantTO = int(input("Choice: "))
+        cur, conn = self.connect(campName)
 
-        if wantTO > 2 or wantTO < 1:
-            os.system("cls")
-            return
+        # first get basic things
+        itemName = data[0].lower()
+        category = data[1].lower()
+        quantity = data[5]
 
-        # get and set category correctly
-        category = input("Enter supply type (regular(r)/medical(m)): ")
-        while category not in ('r', 'm'):
-            print("Error, wrong choice! Enter only one character (r/m)")
-            category = input("Enter supply type (regular(r)/medical(m)): ")
-        if category == 'r':
-            category = "regular"
-        else:
-            category = "medical"
-        # set tablename
+        # select appropriate table
         tableName = category + "_supply_table" + CampAdmin.thisYear
+        query = "select item_name from " + tableName + ";"
+        cur.execute(query)
 
-        # if want to add new item
-        if wantTO == 1:
-            # get item details
-            itemName = input("Enter the name of item: ").lower()
-            while len(itemName) < 2:
-                itemName = input("Enter the name of item: ")
+        # get list of all items already present
+        allItems = cur.fetchall()
+        listOfItems = list()
+        for itm in allItems:
+            listOfItems.append(itm[0])
+        print(listOfItems)
 
-            itemType = input("Enter the type of item: ")
-            while itemType == '':
-                itemType = input("Enter the type of item: ")
+        # if the item is already present, then update it's quantity
+        if itemName in listOfItems:
+            # create and execute the query
+            query = "update " + tableName + " set qty = " + quantity + " where item_name = '" + itemName + "';"
+            cur.execute(query)
+            print()
 
-            itemDescription = input("Enter item description: ")
-            while len(itemDescription) < 2:
-                print("Enter a valid item description")
-                itemDescription = input("Enter item description: ")
+            rowcount = cur.rowcount
+            cur.close()
+            conn.close()
 
-            quantity = input("Enter quantity: ")
-            while not quantity.isdigit():
-                print("Enter valid quantity (numeric)")
-                quantity = input("Enter quantity: ")
-            while int(quantity) < 0:
-                print("Error, quantity can't be in negative !! Try again...")
-                quantity = input("Enter quantity: ")
-
-            ageGroups = ''
-            if category == "medical":
-                ageGroups = input("Which age groups it is applicable to (all/6-10/etc): ")
+            if rowcount == 1:
+                print("Successfully updated record")
+                return "Successfully updated record"
+            else:
+                print("There was an ERROR in updating the record !! Try again.")
+                return "There was an ERROR in updating the record !!\nTry again."
+        else:
+            # if data item is not present already, then create a new entry for it
+            ageGroups = data[2].lower()
+            itemDescription = data[4].lower()
+            itemType = data[3].lower()
 
             # query created according to category
             if category == "medical":
@@ -674,51 +699,24 @@ class CampAdmin(Database):
                 query = "insert into " + tableName + " values('" + itemName + "', '" + \
                         itemType + "', '" + itemDescription + "', " + quantity + ");"
             # connect to camp database & execute query
+
+            print(query)
             cur, conn = self.connect(campName)
             cur.execute(query)
             print()
 
-            if cur.rowcount == 1:
+            rowcount = cur.rowcount
+            cur.close()
+            conn.close()
+
+            if rowcount == 1:
                 print("Successfully added record")
+                return "Successfully added record"
             else:
                 print("There was an ERROR in adding the record !! Try again.")
-            cur.close()
-            conn.close()
+                return "There was an ERROR in adding the record !! \nTry again."
 
-        else:
-            cur, conn = self.connect(campName)
-
-            # first get all supply item names
-            query = "select item_name from " + tableName + ";"
-            cur.execute(query)
-            # print item names
-            allItems = cur.fetchall()
-            listOfItems = list()
-            for itm in allItems:
-                listOfItems.append(itm[0])
-            print(listOfItems)
-
-            itemName = input("\nEnter the itemName to update it's supply: ").lower()
-
-            # if the name is not in supply item list
-            while itemName not in listOfItems:
-                print("Error, item does not exists in pre existing items!! Try again...")
-                itemName = input("\nEnter the itemName to update it's supply: ").lower()
-            qty = input("Enter updated quantity: ")
-
-            # create and execute the query 
-            query = "update " + tableName + " set qty = " + qty + " where item_name = '" + itemName + "';"
-            cur.execute(query)
-            print()
-
-            if cur.rowcount == 1:
-                print("Successfully updated record")
-            else:
-                print("There was an ERROR in updating the record !! Try again.")
-            cur.close()
-            conn.close()
-
-    # -------------------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------------------
 
     def feedback(self, campName):
         # for each and everything in detail
