@@ -365,16 +365,6 @@ class CampAdmin(Database):
         print("Inside UpdateDetails")
         # connect to camp's database
         cur, conn = self.connect(campName)
-        # os.system("cls")
-
-        # # ------------------- Menu -------------------
-        # print("1. Update injury status of person in camp")
-        # print("2. Update leftOn date for a person who is leaving the camp")
-        # cat = input("Which category to update?(1/2) ")
-        # while cat not in ('1', '2'):
-        #     print("\n\nEnter a valid choice")
-        #     cat = input("Which category to update?(1/2) ")
-        # ------------------- ------------------- -----
 
         # get basic input to identify the person
         familyId = data[0]
@@ -396,12 +386,6 @@ class CampAdmin(Database):
                 print("Error!, can't set level as injury is set to NO for the person.")
                 message += "couldn't set injury level as injury is set to NO for the person.\n"
             else:
-                # if injury is there, then print the person name
-                # os.system("cls")
-                # print("Found this record -\n")
-                # for row in cur.fetchall():
-                #     print(row)
-                # print()
                 # ------------------- get injury details -------------------
                 print("Injury levels: Low(L), Normal(N), High(H), Critical(C)")
                 injuryLevel = data[2]
@@ -643,7 +627,6 @@ class CampAdmin(Database):
             print("There was an ERROR in submission of report !!")
             print("Try again...")
             return "There was an ERROR in submission of report !!"
-        print()
 
     # -------------------------------------------------------------------------------------------------
 

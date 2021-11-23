@@ -48,7 +48,7 @@ class CampAdminWindow(QMainWindow, CampAdmin_UI.Ui_camp_admin):
         self.pushButton_update_details.clicked.connect(self.enable_update_fields)
         self.pushButton_fId_mNo_mName.clicked.connect(self.person_details_update_form)
         self.details_update_win = CampAdmin.UpdatePerson()
-        # self.details_update_win.pushButton.clicked.connect(self.update_the_details)
+        self.details_update_win.pushButton.clicked.connect(self.update_the_details)
 
         self.pushButton_find_resource.clicked.connect(self.ask_district)
         self.resource_type_win = CampAdmin.ResourceType()
@@ -88,6 +88,7 @@ class CampAdminWindow(QMainWindow, CampAdmin_UI.Ui_camp_admin):
     def get_district(self):
         self.ask_district()
         self.pushButton_district_itmTyp.setText('find..')
+
 
     def find_vacancies(self):
         print("in findvacancies")

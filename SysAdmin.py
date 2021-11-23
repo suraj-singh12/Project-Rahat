@@ -414,22 +414,6 @@ class SysAdmin(Database):
             t = list()
             t.append('-1')
             return tuple(t)
-        #
-        #         relation = input("Enter the relation name you want to access: ")
-        #
-        #         # if the relation is present then print its data, else say not found
-        #         if relation in all_relations:
-        #             print("Data of " + relation + ": ")
-        #             cur.execute("select * from " + relation + ";")
-        #             for row in cur.fetchall():
-        #                 print(row)
-        #         else:
-        #             print("Error, " + relation + " not found! Please select an existing relation")
-        #
-        #     cur.close()
-        #     conn.close()
-        # else:
-        #     print("Error! " + campName + " is not a registered camp")
 
     # -----------------------------------------------------------------------------------------------------------------------------
 
