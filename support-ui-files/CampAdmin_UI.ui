@@ -5104,7 +5104,7 @@
     <property name="title">
      <string>Edit</string>
     </property>
-    <addaction name="actionFind_Resource_Availability"/>
+    <addaction name="actionUpdate_details_of_a_person"/>
     <addaction name="actionUpdate_Supply_Data"/>
    </widget>
    <widget class="QMenu" name="menuView">
@@ -5140,7 +5140,7 @@
     <string>Update Details of a Person</string>
    </property>
   </action>
-  <action name="actionFind_Resource_Availability">
+  <action name="actionUpdate_details_of_a_person">
    <property name="text">
     <string>Update Details of a person</string>
    </property>
