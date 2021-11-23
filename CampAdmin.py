@@ -394,14 +394,8 @@ class CampAdmin(Database):
             # if no injury then return
             if cur.rowcount == 0:
                 print("Error!, can't set level as injury is set to NO for the person.")
-                message += "couldn't set injury level as injury is set to NO for the person.\n"
+                message += "Couldn't set injury level as injury is set to NO for the person.\n"
             else:
-                # if injury is there, then print the person name
-                # os.system("cls")
-                # print("Found this record -\n")
-                # for row in cur.fetchall():
-                #     print(row)
-                # print()
                 # ------------------- get injury details -------------------
                 print("Injury levels: Low(L), Normal(N), High(H), Critical(C)")
                 injuryLevel = data[2]
