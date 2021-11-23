@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow">
+ <class>camp_admin</class>
+ <widget class="QMainWindow" name="camp_admin">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -30,7 +30,7 @@
      <bool>true</bool>
     </property>
    </widget>
-   <widget class="QWidget" name="widget" native="true">
+   <widget class="QWidget" name="widget_grey" native="true">
     <property name="geometry">
      <rect>
       <x>1330</x>
@@ -908,7 +908,7 @@
      <bool>true</bool>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_71">
+   <widget class="QPushButton" name="pushButton_fId_mNo_mName">
     <property name="geometry">
      <rect>
       <x>570</x>
@@ -927,7 +927,7 @@
      <string>Update...</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_72">
+   <widget class="QPushButton" name="pushButton_district_itmTyp">
     <property name="geometry">
      <rect>
       <x>1110</x>
@@ -945,6 +945,9 @@
     <property name="text">
      <string>Find...</string>
     </property>
+    <property name="autoDefault">
+     <bool>false</bool>
+    </property>
    </widget>
    <widget class="QLabel" name="camp_name_label">
     <property name="geometry">
@@ -959,7 +962,7 @@
      <string/>
     </property>
    </widget>
-   <widget class="QLabel" name="label">
+   <widget class="QLabel" name="label_select_an_operation">
     <property name="geometry">
      <rect>
       <x>11</x>
@@ -990,7 +993,7 @@
     <widget class="QWidget" name="layoutWidget">
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
-       <widget class="QPushButton" name="pushButton">
+       <widget class="QPushButton" name="pushButton_read_records">
         <property name="minimumSize">
          <size>
           <width>250</width>
@@ -1426,7 +1429,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_2">
+       <widget class="QPushButton" name="pushButton_enter_new_record">
         <property name="minimumSize">
          <size>
           <width>250</width>
@@ -1862,7 +1865,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_3">
+       <widget class="QPushButton" name="pushButton_update_details">
         <property name="minimumSize">
          <size>
           <width>250</width>
@@ -2302,7 +2305,7 @@
     <widget class="QWidget" name="layoutWidget">
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
-       <widget class="QPushButton" name="pushButton_5">
+       <widget class="QPushButton" name="pushButton_find_resource">
         <property name="minimumSize">
          <size>
           <width>250</width>
@@ -2738,7 +2741,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_7">
+       <widget class="QPushButton" name="pushButton_request_supply">
         <property name="minimumSize">
          <size>
           <width>250</width>
@@ -3174,7 +3177,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_8">
+       <widget class="QPushButton" name="pushButton_update_supply">
         <property name="minimumSize">
          <size>
           <width>50</width>
@@ -3618,7 +3621,7 @@
      <widget class="QWidget" name="layoutWidget">
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
-        <widget class="QPushButton" name="pushButton_4">
+        <widget class="QPushButton" name="pushButton_find_vacancies">
          <property name="minimumSize">
           <size>
            <width>250</width>
@@ -4054,7 +4057,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton_9">
+        <widget class="QPushButton" name="pushButton_today_view_all">
          <property name="minimumSize">
           <size>
            <width>250</width>
@@ -4491,7 +4494,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QPushButton" name="pushButton_6">
+     <widget class="QPushButton" name="pushButton_exit">
       <property name="minimumSize">
        <size>
         <width>150</width>
@@ -4941,7 +4944,7 @@
       <number>30</number>
      </property>
      <item row="0" column="0">
-      <widget class="QLabel" name="label_1">
+      <widget class="QLabel" name="label_family_id">
        <property name="font">
         <font>
          <pointsize>10</pointsize>
@@ -4953,7 +4956,7 @@
       </widget>
      </item>
      <item row="0" column="1">
-      <widget class="QLineEdit" name="lineEdit">
+      <widget class="QLineEdit" name="lineEdit_family_id">
        <property name="minimumSize">
         <size>
          <width>0</width>
@@ -4963,7 +4966,7 @@
       </widget>
      </item>
      <item row="1" column="0">
-      <widget class="QLabel" name="label_2">
+      <widget class="QLabel" name="label_member_no">
        <property name="font">
         <font>
          <pointsize>10</pointsize>
@@ -4975,7 +4978,7 @@
       </widget>
      </item>
      <item row="1" column="1">
-      <widget class="QLineEdit" name="lineEdit_2">
+      <widget class="QLineEdit" name="lineEdit_member_no">
        <property name="minimumSize">
         <size>
          <width>0</width>
@@ -4985,7 +4988,7 @@
       </widget>
      </item>
      <item row="2" column="0">
-      <widget class="QLabel" name="label_3">
+      <widget class="QLabel" name="label_member_name">
        <property name="font">
         <font>
          <pointsize>10</pointsize>
@@ -4997,7 +5000,7 @@
       </widget>
      </item>
      <item row="2" column="1">
-      <widget class="QLineEdit" name="lineEdit_3">
+      <widget class="QLineEdit" name="lineEdit_member_name">
        <property name="minimumSize">
         <size>
          <width>0</width>
@@ -5022,7 +5025,7 @@
       <number>30</number>
      </property>
      <item row="0" column="0">
-      <widget class="QLabel" name="label_4">
+      <widget class="QLabel" name="label_district_name">
        <property name="font">
         <font>
          <pointsize>10</pointsize>
@@ -5034,7 +5037,7 @@
       </widget>
      </item>
      <item row="0" column="1">
-      <widget class="QLineEdit" name="lineEdit_4">
+      <widget class="QLineEdit" name="lineEdit_district_name">
        <property name="minimumSize">
         <size>
          <width>0</width>

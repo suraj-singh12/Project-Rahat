@@ -10,32 +10,34 @@ import CampAdmin
 import SysAdmin
 
 
-class CampAdminWindow(QMainWindow, CampAdmin_UI.Ui_MainWindow):
+class CampAdminWindow(QMainWindow, CampAdmin_UI.Ui_camp_admin):
     def __init__(self, camp_name):
         super(CampAdminWindow, self).__init__()
         self.setupUi(self)
+        print("setup done")
         # disable all input boxes (default)
-        self.lineEdit.setEnabled(False)
-        self.lineEdit_2.setEnabled(False)
-        self.lineEdit_3.setEnabled(False)
-        self.lineEdit_4.setEnabled(False)
+        self.lineEdit_family_id.setEnabled(False)
+        self.lineEdit_member_no.setEnabled(False)
+        self.lineEdit_member_name.setEnabled(False)
+        self.lineEdit_district_name.setEnabled(False)
         # disable both buttons (update, find)
-        self.pushButton_71.setText("Disabled")
-        self.pushButton_71.setEnabled(False)
-        self.pushButton_72.setText("Disabled")
-        self.pushButton_72.setEnabled(False)
+        self.pushButton_fId_mNo_mName.setText("Disabled")
+        self.pushButton_fId_mNo_mName.setEnabled(False)
+        self.pushButton_district_itmTyp.setText("Disabled")
+        self.pushButton_district_itmTyp.setEnabled(False)
+
         # disable labels
-        self.label_1.setEnabled(False)
-        self.label_2.setEnabled(False)
-        self.label_3.setEnabled(False)
-        self.label_4.setEnabled(False)
+        self.label_family_id.setEnabled(False)
+        self.label_member_no.setEnabled(False)
+        self.label_member_name.setEnabled(False)
+        self.label_district_name.setEnabled(False)
 
         self.label_item_type.setEnabled(False)
         self.comboBox_item_type.setEnabled(False)
 
-        self.pushButton.clicked.connect(self.read_my_tables)
+        self.pushButton_read_records.clicked.connect(self.read_my_tables)
 
-        self.pushButton_2.clicked.connect(self.new_person_form)
+        self.pushButton_enter_new_record.clicked.connect(self.new_person_form)
         self.new_person_data = list()     # will become a list later on
         self.count = None
         self.new_person_win = CampAdmin.NewPerson()
@@ -43,17 +45,27 @@ class CampAdminWindow(QMainWindow, CampAdmin_UI.Ui_MainWindow):
         self.new_person_win.lineEdit_4.setText("self")
         self.new_person_win.lineEdit_4.setEnabled(False)
 
-        self.pushButton_3.clicked.connect(self.enable_update_fields)
-        self.pushButton_71.clicked.connect(self.person_details_update_form)
+        self.pushButton_update_details.clicked.connect(self.enable_update_fields)
+        self.pushButton_fId_mNo_mName.clicked.connect(self.person_details_update_form)
         self.details_update_win = CampAdmin.UpdatePerson()
         # self.details_update_win.pushButton.clicked.connect(self.update_the_details)
 
-        self.pushButton_5.clicked.connect(self.ask_district)
+        self.pushButton_find_resource.clicked.connect(self.ask_district)
         self.resource_type_win = CampAdmin.ResourceType()
         # self.medical_res_win = CampAdmin.MedicalResource()
         # self.regular_res_win = CampAdmin.RegularResource()
-        self.pushButton_72.clicked.connect(self.resource_type_select)
+        self.pushButton_district_itmTyp.clicked.connect(self.resource_type_select)
         self.resource_type_win.pushButton_2.clicked.connect(self.launch_appropriate_res_table)
+
+        self.pushButton_request_supply.clicked.connect(self.launch_supply_dialog)
+        self.supply_rqst_dlg = CampAdmin.RequestSupply()
+        self.supply_rqst_dlg.pushButton_submit.clicked.connect(self.make_supply_request)
+
+        self.pushButton_update_supply.clicked.connect(self.launch_update_supply_dialog)
+        self.update_supply_dlg = CampAdmin.UpdateSupply()
+        self.update_supply_dlg.pushButton_submit.clicked.connect(self.make_supply_update)
+
+        self.pushButton_find_vacancies.clicked.connect(self.get_district)
 
         self.new_person_win.checkBox.clicked.connect(self.configure_injury_subform)
         self.new_person_win.checkBox_2.clicked.connect(self.configure_injury_subform)
@@ -61,38 +73,118 @@ class CampAdminWindow(QMainWindow, CampAdmin_UI.Ui_MainWindow):
         # when submit is pressed
         self.new_person_win.pushButton.clicked.connect(self.check_times)
 
-        self.pushButton_9.clicked.connect(self.launch_today_view_all_window)
-        self.pushButton_6.clicked.connect(self.exit_now)
+        self.pushButton_today_view_all.clicked.connect(self.launch_today_view_all_window)
+        self.pushButton_exit.clicked.connect(self.exit_now)
 
         # initialize the object
         self.camp_name = camp_name
-        print(self.camp_name)
+        # print(self.camp_name)
         self.__pswd = "IamCampAdmin88"
         self.admin = CampAdmin.CampAdmin(self.camp_name, self.__pswd)
 
     def new_person_form(self):
         self.new_person_win.show()
 
+    def get_district(self):
+        self.ask_district()
+        self.pushButton_district_itmTyp.setText('find..')
+
+    def find_vacancies(self):
+        print("in findvacancies")
+        district = self.lineEdit_district_name.text().lower()
+        self.data = self.admin.findVacancies(district)
+
+        if type(self.data) is not list and 'error' in self.data.lower():
+            QMessageBox.critical(self, "Error", self.data)
+        elif len(self.data) == 0:
+            QMessageBox.information(self, "Information", "Nothing found in this district!!\t")
+        else:
+            self.vacancies_win = CampAdmin.VacanciesInCamp()
+            # if data is there in table then
+            for i in range(len(self.data)):
+                for j in range(len(self.data[i])):
+                    self.tmp_label = QLabel()
+                    self.tmp_label.setText(str(self.data[i][j]))
+                    self.tmp_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+                    self.tmp_label.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                    self.tmp_label.setFrameShape(QFrame.Panel)
+                    self.tmp_label.setMinimumHeight(25)
+                    self.vacancies_win.gridLayout.addWidget(self.tmp_label, i + 1, j)
+            # show
+            self.vacancies_win.show()
+
+    # ------------------ update/add supply items in camp records --------
+    def launch_update_supply_dialog(self):
+        print("launching update supply dlg")
+        self.update_supply_dlg.show()
+
+    def make_supply_update(self):
+        print("Marking supply updates")
+        self.update_supply_dlg.close()
+        itm_name = self.update_supply_dlg.lineEdit_item_name.text()
+        category = self.update_supply_dlg.comboBox_category.currentText().lower()
+        age_grp = self.update_supply_dlg.comboBox_age_group.currentText().lower()
+        itm_type = self.update_supply_dlg.lineEdit_item_type.text().lower()
+        itm_desc = self.update_supply_dlg.lineEdit_item_description.text().lower()
+        itm_qty = self.update_supply_dlg.spinBox_quantity.text()
+
+        data = (itm_name, category, age_grp, itm_type, itm_desc, itm_qty)
+        self.response = self.admin.updateSupplyData(self.camp_name, data)
+        print(self.response)
+        self.update_supply_dlg.pushButton_reset.click()
+        if "error" not in self.response.lower():
+            QMessageBox.information(self, "Information", self.response)
+        else:
+            QMessageBox.critical(self, "Error", self.response)
+
+    # ------------------ For item supply request --------------------------
+    def launch_supply_dialog(self):
+        print("launch supply dialog")
+        self.supply_rqst_dlg.show()
+
+    def make_supply_request(self):
+        print("Making supply request!!")
+        self.supply_rqst_dlg.close()
+        itm_name = self.supply_rqst_dlg.lineEdit_item_name.text()
+        itm_type = self.supply_rqst_dlg.comboBox_item_type.currentText()
+        itm_desc = self.supply_rqst_dlg.lineEdit_item_desc.text()
+        qty = self.supply_rqst_dlg.spinbox_quantity.text()
+        data = (itm_name, itm_type, itm_desc, qty)
+        self.response = self.admin.requestSupplyFromMain(self.camp_name, data)
+        if "error" not in self.response.lower():
+            QMessageBox.information(self, "Success", self.response)
+        else:
+            QMessageBox.critical(self, "Error", self.response)
+        # clear the form
+        self.supply_rqst_dlg.pushButton_reset.click()
+
+    # --------------- For finding resource availability -----------------
+
     def ask_district(self):
-        self.label_4.setEnabled(True)
-        self.lineEdit_4.setEnabled(True)
-        self.lineEdit_4.clear()
-        self.lineEdit_4.setFocus()
-        self.pushButton_72.setEnabled(True)
-        self.pushButton_72.setText("Find...")
-        self.pushButton_72.setAutoDefault(True)
+        self.label_district_name.setEnabled(True)
+        self.lineEdit_district_name.setEnabled(True)
+        self.lineEdit_district_name.clear()
+        self.lineEdit_district_name.setFocus()
+        self.pushButton_district_itmTyp.setEnabled(True)
+        self.pushButton_district_itmTyp.setText("Find...")
+        self.pushButton_district_itmTyp.setAutoDefault(True)
 
     def resource_type_select(self):
-        self.label_4.setEnabled(False)
-        self.lineEdit_4.setEnabled(False)
-        self.pushButton_72.setText("Disabled")
-        self.pushButton_72.setEnabled(False)
-
-        self.resource_type_win.lineEdit.setFocus()
-        self.resource_type_win.lineEdit.clear()
-        self.resource_type_win.pushButton.setAutoDefault(True)
-        self.resource_type_win.pushButton_2.setAutoDefault(True)
-        self.resource_type_win.show()
+        button_is = self.pushButton_district_itmTyp.text()
+        self.label_district_name.setEnabled(False)
+        self.lineEdit_district_name.setEnabled(False)
+        self.pushButton_district_itmTyp.setText("Disabled")
+        self.pushButton_district_itmTyp.setEnabled(False)
+        print(button_is)
+        if button_is == "Find...":
+            self.resource_type_win.lineEdit.setFocus()
+            self.resource_type_win.lineEdit.clear()
+            self.resource_type_win.pushButton.setAutoDefault(True)
+            self.resource_type_win.pushButton_2.setAutoDefault(True)
+            self.resource_type_win.show()
+        else:
+            print("in final or res_type_sel")
+            self.find_vacancies()
 
     def launch_appropriate_res_table(self):
         # close type select form
@@ -101,7 +193,7 @@ class CampAdminWindow(QMainWindow, CampAdmin_UI.Ui_MainWindow):
         self.regular_res_win = CampAdmin.RegularResource()
         self.medical_res_win = CampAdmin.MedicalResource()
 
-        district = self.lineEdit_4.text()
+        district = self.lineEdit_district_name.text()
         item_name = self.resource_type_win.lineEdit.text().lower()
         item_type = self.resource_type_win.comboBox.currentText().lower()
         # print(item_type)
@@ -146,21 +238,21 @@ class CampAdminWindow(QMainWindow, CampAdmin_UI.Ui_MainWindow):
 
 
     def enable_update_fields(self):
-        self.lineEdit.setEnabled(True)
-        self.lineEdit.clear()
-        self.lineEdit.setFocus()
-        self.lineEdit_2.setEnabled(True)
-        self.lineEdit_2.clear()
-        # self.lineEdit_3.setEnabled(True)
-        self.label_1.setEnabled(True)
-        self.label_2.setEnabled(True)
-        self.pushButton_71.setEnabled(True)
-        self.pushButton_71.autoDefault()
-        self.pushButton_71.setText("Update...")
+        self.lineEdit_family_id.setEnabled(True)
+        self.lineEdit_family_id.clear()
+        self.lineEdit_family_id.setFocus()
+        self.lineEdit_member_no.setEnabled(True)
+        self.lineEdit_member_no.clear()
+        # self.lineEdit_member_name.setEnabled(True)
+        self.label_family_id.setEnabled(True)
+        self.label_member_no.setEnabled(True)
+        self.pushButton_fId_mNo_mName.setEnabled(True)
+        self.pushButton_fId_mNo_mName.autoDefault()
+        self.pushButton_fId_mNo_mName.setText("Update...")
 
     def person_details_update_form(self):
-        family_id = self.lineEdit.text()
-        member_no = self.lineEdit_2.text()
+        family_id = self.lineEdit_family_id.text()
+        member_no = self.lineEdit_member_no.text()
         if family_id == '' or member_no == '':
             QMessageBox.critical(self, "Error", "Family ID or Member No can't be empty!!")
         else:
@@ -170,12 +262,12 @@ class CampAdminWindow(QMainWindow, CampAdmin_UI.Ui_MainWindow):
 
     def update_the_details(self):
         self.details_update_win.close()
-        self.lineEdit.setEnabled(False)
-        self.lineEdit_2.setEnabled(False)
-        self.label_1.setEnabled(False)
-        self.label_2.setEnabled(False)
-        family_id = self.lineEdit.text()
-        member_no = self.lineEdit_2.text()
+        self.lineEdit_family_id.setEnabled(False)
+        self.lineEdit_member_no.setEnabled(False)
+        self.label_family_id.setEnabled(False)
+        self.label_member_no.setEnabled(False)
+        family_id = self.lineEdit_family_id.text()
+        member_no = self.lineEdit_member_no.text()
         injury = self.details_update_win.comboBox.currentText()
         if 'Select' not in injury:
             injury = injury[0]
@@ -513,19 +605,19 @@ class CampAdminWindow(QMainWindow, CampAdmin_UI.Ui_MainWindow):
     # -------------------------------------------------------------------------------------------------------
 
     def setup_for_update_table_details(self):
-            self.label_1.setEnabled(True)
-            self.label_2.setEnabled(True)
-            self.label_3.setEnabled(True)
+            self.label_family_id.setEnabled(True)
+            self.label_member_no.setEnabled(True)
+            self.label_member_name.setEnabled(True)
 
-            self.lineEdit.setEnabled(True)
-            self.lineEdit.clear()
-            self.lineEdit_2.setEnabled(True)
-            self.lineEdit_2.clear()
-            self.lineEdit_3.setEnabled(True)
-            self.lineEdit_3.clear()
+            self.lineEdit_family_id.setEnabled(True)
+            self.lineEdit_family_id.clear()
+            self.lineEdit_member_no.setEnabled(True)
+            self.lineEdit_member_no.clear()
+            self.lineEdit_member_name.setEnabled(True)
+            self.lineEdit_member_name.clear()
 
-            self.pushButton_71.setEnabled(True)
-            self.pushButton_71.setText("Update")
+            self.pushButton_fId_mNo_mName.setEnabled(True)
+            self.pushButton_fId_mNo_mName.setText("Update")
 
 
 class SysAdminWindow(QMainWindow, SystemAdmin_UI.Ui_MainWindow):
