@@ -365,16 +365,6 @@ class CampAdmin(Database):
         print("Inside UpdateDetails")
         # connect to camp's database
         cur, conn = self.connect(campName)
-        # os.system("cls")
-
-        # # ------------------- Menu -------------------
-        # print("1. Update injury status of person in camp")
-        # print("2. Update leftOn date for a person who is leaving the camp")
-        # cat = input("Which category to update?(1/2) ")
-        # while cat not in ('1', '2'):
-        #     print("\n\nEnter a valid choice")
-        #     cat = input("Which category to update?(1/2) ")
-        # ------------------- ------------------- -----
 
         # get basic input to identify the person
         familyId = data[0]
@@ -637,7 +627,6 @@ class CampAdmin(Database):
             print("There was an ERROR in submission of report !!")
             print("Try again...")
             return "There was an ERROR in submission of report !!"
-        print()
 
     # -------------------------------------------------------------------------------------------------
 

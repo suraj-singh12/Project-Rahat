@@ -89,6 +89,7 @@ class CampAdminWindow(QMainWindow, CampAdmin_UI.Ui_camp_admin):
         self.ask_district()
         self.pushButton_district_itmTyp.setText('find..')
 
+
     def find_vacancies(self):
         print("in findvacancies")
         district = self.lineEdit_district_name.text().lower()
