@@ -11,6 +11,43 @@ import MedicalSupplyTable_UI
 import TodayAll_UI
 import MyCampInfo_UI
 import AllCampDetails_UI
+import all_camp_det_selector
+import CampDet_SupportMember_UI
+import Demand_Feedback_UI
+
+
+class DemandFeedback(QtWidgets.QMainWindow, Demand_Feedback_UI.Ui_MainWindow):
+    def __init__(self):
+        super(DemandFeedback, self).__init__()
+        self.setupUi(self)
+        self.pushButton_ok.setAutoDefault(True)
+        self.pushButton_ok.clicked.connect(self.ok_clicked)
+
+    def ok_clicked(self):
+        # close the window
+        self.close()
+
+class CampDetSupportMem(QtWidgets.QMainWindow, CampDet_SupportMember_UI.Ui_MainWindow):
+    def __init__(self):
+        super(CampDetSupportMem, self).__init__()
+        self.setupUi(self)
+        self.setWindowTitle("Details")
+        self.pushButton_ok.clicked.connect(self.ok_clicked)
+
+    def ok_clicked(self):
+        # close the window
+        self.close()
+
+
+class SelectOneOfAllDetails(QtWidgets.QWidget, all_camp_det_selector.Ui_Dialog):
+    def __init__(self):
+        super(SelectOneOfAllDetails, self).__init__()
+        self.setupUi(self)
+        self.pushButton_basic_details.setAutoDefault(True)
+        self.pushButton_demand_n_feedback.setAutoDefault(True)
+
+        self.pushButton_basic_details.setFocus()
+        self.setWindowTitle("Selector")
 
 
 class SelectATable(QtWidgets.QWidget, SelectTableToRead_UI.Ui_Dialog):

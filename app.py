@@ -14,7 +14,7 @@ class CampAdminWindow(QMainWindow, CampAdmin_UI.Ui_camp_admin):
     def __init__(self, camp_name):
         super(CampAdminWindow, self).__init__()
         self.setupUi(self)
-        print("setup done")
+
         # disable all input boxes (default)
         self.lineEdit_family_id.setEnabled(False)
         self.lineEdit_member_no.setEnabled(False)
@@ -26,18 +26,22 @@ class CampAdminWindow(QMainWindow, CampAdmin_UI.Ui_camp_admin):
         self.pushButton_district_itmTyp.setText("Disabled")
         self.pushButton_district_itmTyp.setEnabled(False)
 
-        # disable labels
+        # disable labels of above buttons
         self.label_family_id.setEnabled(False)
         self.label_member_no.setEnabled(False)
         self.label_member_name.setEnabled(False)
         self.label_district_name.setEnabled(False)
-
+        # disable these too
         self.label_item_type.setEnabled(False)
         self.comboBox_item_type.setEnabled(False)
 
+        # for reading details of persons in camp
         self.pushButton_read_records.clicked.connect(self.read_my_tables)
+        self.actionRead_Records.triggered.connect(self.read_my_tables)
 
+        # for adding new person in camp
         self.pushButton_enter_new_record.clicked.connect(self.new_person_form)
+        self.actionEnter_New_Record.triggered.connect(self.new_person_form)
         self.new_person_data = list()     # will become a list later on
         self.count = None
         self.new_person_win = CampAdmin.NewPerson()
@@ -45,36 +49,56 @@ class CampAdminWindow(QMainWindow, CampAdmin_UI.Ui_camp_admin):
         self.new_person_win.lineEdit_4.setText("self")
         self.new_person_win.lineEdit_4.setEnabled(False)
 
+        # for updating details of person in camp
+        # main button
         self.pushButton_update_details.clicked.connect(self.enable_update_fields)
+        self.actionUpdate_details_of_a_person.triggered.connect(self.enable_update_fields)
+        # below button
         self.pushButton_fId_mNo_mName.clicked.connect(self.person_details_update_form)
         self.details_update_win = CampAdmin.UpdatePerson()
         self.details_update_win.pushButton.clicked.connect(self.update_the_details)
 
+        # find resource availability
         self.pushButton_find_resource.clicked.connect(self.ask_district)
+        self.actionFind_Resource.triggered.connect(self.ask_district)
         self.resource_type_win = CampAdmin.ResourceType()
         # self.medical_res_win = CampAdmin.MedicalResource()
         # self.regular_res_win = CampAdmin.RegularResource()
         self.pushButton_district_itmTyp.clicked.connect(self.resource_type_select)
         self.resource_type_win.pushButton_2.clicked.connect(self.launch_appropriate_res_table)
 
+        # request supply data
         self.pushButton_request_supply.clicked.connect(self.launch_supply_dialog)
+        self.actionRequest_Supply_Data.triggered.connect(self.launch_supply_dialog)
         self.supply_rqst_dlg = CampAdmin.RequestSupply()
         self.supply_rqst_dlg.pushButton_submit.clicked.connect(self.make_supply_request)
 
+        # update supply data
         self.pushButton_update_supply.clicked.connect(self.launch_update_supply_dialog)
+        self.actionUpdate_Supply_Data.triggered.connect(self.launch_update_supply_dialog)
         self.update_supply_dlg = CampAdmin.UpdateSupply()
         self.update_supply_dlg.pushButton_submit.clicked.connect(self.make_supply_update)
 
+        # find vacancies
         self.pushButton_find_vacancies.clicked.connect(self.get_district)
+        self.actionFind_Vacancies_in_other_camps.triggered.connect(self.get_district)
 
+        # new person in camp (window for getting new person's details)
         self.new_person_win.checkBox.clicked.connect(self.configure_injury_subform)
         self.new_person_win.checkBox_2.clicked.connect(self.configure_injury_subform)
         self.new_person_win.comboBox_2.currentIndexChanged.connect(self.toggle_recovery_percent)
         # when submit is pressed
         self.new_person_win.pushButton.clicked.connect(self.check_times)
 
+        # view today all
         self.pushButton_today_view_all.clicked.connect(self.launch_today_view_all_window)
+        self.actionView_Today.triggered.connect(self.launch_today_view_all_window)
+
+        # exit
         self.pushButton_exit.clicked.connect(self.exit_now)
+
+        # about
+        self.actionAbout.triggered.connect(self.about)
 
         # initialize the object
         self.camp_name = camp_name
@@ -85,13 +109,19 @@ class CampAdminWindow(QMainWindow, CampAdmin_UI.Ui_camp_admin):
     def new_person_form(self):
         self.new_person_win.show()
 
+    def about(self):
+        message = "Project RAHAT v1.0\t\t\n\nCreated By   - Suraj Singh\t\t\n" \
+                  "Designation - B.Tech CSE student (2nd Year)" \
+                  "\t\t\n\nContributor  - Vagish Baweja\t\t\nDesignation - B.Tech CSE student (2nd Year)\n"
+        self.aboutMessage = QMessageBox.information(self, "About", message)
+
+    # ------------------- To find vacancies in other camps -----------------------
     def get_district(self):
         self.ask_district()
         self.pushButton_district_itmTyp.setText('find..')
 
-
     def find_vacancies(self):
-        print("in findvacancies")
+        print("in find vacancies")
         district = self.lineEdit_district_name.text().lower()
         self.data = self.admin.findVacancies(district)
 
@@ -162,6 +192,7 @@ class CampAdminWindow(QMainWindow, CampAdmin_UI.Ui_camp_admin):
     # --------------- For finding resource availability -----------------
 
     def ask_district(self):
+        print("in")
         self.label_district_name.setEnabled(True)
         self.lineEdit_district_name.setEnabled(True)
         self.lineEdit_district_name.clear()
@@ -169,6 +200,7 @@ class CampAdminWindow(QMainWindow, CampAdmin_UI.Ui_camp_admin):
         self.pushButton_district_itmTyp.setEnabled(True)
         self.pushButton_district_itmTyp.setText("Find...")
         self.pushButton_district_itmTyp.setAutoDefault(True)
+        print("out")
 
     def resource_type_select(self):
         button_is = self.pushButton_district_itmTyp.text()
@@ -236,7 +268,6 @@ class CampAdminWindow(QMainWindow, CampAdmin_UI.Ui_camp_admin):
             QMessageBox.critical(self, "Empty", "Nothing found in this district!!\t")
 
     # ---------------- for updating details of a person -------------------------------------
-
 
     def enable_update_fields(self):
         self.lineEdit_family_id.setEnabled(True)
@@ -634,8 +665,15 @@ class SysAdminWindow(QMainWindow, SystemAdmin_UI.Ui_MainWindow):
         self.actionList_all_camp_details_2.triggered.connect(self.list_all_registered_camps)
         self.pushButton_4.clicked.connect(self.setup_for_read_database)
         self.actionRead_a_camp_2.triggered.connect(self.setup_for_read_database)
-        self.pushButton_5.clicked.connect(self.list_all_camps_details)
-        self.actionList_all_camp_details_3.triggered.connect(self.list_all_camps_details)
+
+        self.pushButton_5.clicked.connect(self.select_one_of_all_tbl)
+        self.actionList_all_camp_details_3.triggered.connect(self.select_one_of_all_tbl)
+        print(1)
+        self.one_selector = SysAdmin.SelectOneOfAllDetails()
+        print(2)
+        self.one_selector.pushButton_basic_details.clicked.connect(self.list_all_basic_details)
+        self.one_selector.pushButton_demand_n_feedback.clicked.connect(self.list_all_demand_feedback)
+
         self.pushButton_6.clicked.connect(self.exit_now)
         self.actionExit.triggered.connect(self.exit_now)
         self.actionLogout.triggered.connect(self.exit_now)
@@ -1027,20 +1065,25 @@ class SysAdminWindow(QMainWindow, SystemAdmin_UI.Ui_MainWindow):
 
     # ----------------------- ----------------------- -----------------------
 
-    def list_all_camps_details(self):
+    def select_one_of_all_tbl(self):
+        self.one_selector.show()
+
+    def list_all_basic_details(self):
         self.pushButton_7.setText("Disabled")
         self.pushButton_7.setEnabled(False)
 
         print("List all camps and their details signal received")
-        self.camp_det_win = SysAdmin.AllCampDet()
+        self.camp_det_win = SysAdmin.CampDetSupportMem()
         # get the data
-        print("here")
+        print("window created")
+
         self.data = self.admin.readTable("all_camp_details", "campdet2021")
+        self.data2 = self.admin.readTable("all_camp_details", "support_members2021")
         print(self.data)
 
         # if data is there in table then
         if len(self.data) != 0:
-            # set the data
+            # set the data  (basic details :campdet2021 table)
             for i in range(len(self.data)):
                 for j in range(len(self.data[i])):
                     self.tmp_label = QLabel()
@@ -1048,12 +1091,95 @@ class SysAdminWindow(QMainWindow, SystemAdmin_UI.Ui_MainWindow):
                     self.tmp_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
                     self.tmp_label.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
                     self.camp_det_win.gridLayout.addWidget(self.tmp_label, i + 1, j)
-            # show
-            print("about to show")
+
+        if len(self.data2) != 0:
+            # set the data  (support member details :support_members2021 table)
+            # fill this table half
+            half = len(self.data2) // 2
+            print(half)
+            for i in range(half):
+                for j in range(len(self.data2[i])):
+                    self.tmp_label = QLabel()
+                    self.tmp_label.setText(str(self.data2[i][j]))
+                    self.tmp_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+                    self.tmp_label.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                    self.camp_det_win.gridLayout_2.addWidget(self.tmp_label, i + 1, j)
+
+            for i in range(half, len(self.data2)):
+                for j in range(len(self.data2[i])):
+                    self.tmp_label = QLabel()
+                    self.tmp_label.setText(str(self.data2[i][j]))
+                    self.tmp_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+                    self.tmp_label.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                    self.camp_det_win.gridLayout_4.addWidget(self.tmp_label, i-half + 1, j)
+
+        if len(self.data) != 0 or len(self.data2) != 0:
             self.camp_det_win.show()
-            print("shown")
+
         else:
             QMessageBox.critical(self, "Empty", "The table is empty!!\t")
+
+    def list_all_demand_feedback(self):
+        self.pushButton_7.setText("Disabled")
+        self.pushButton_7.setEnabled(False)
+
+        print("List all camps and their details signal received")
+        self.demand_feedback_win = SysAdmin.DemandFeedback()
+        # get the data
+        print("window created")
+        self.data = self.admin.readTable("all_camp_details", "demand2021")
+        self.data2 = self.admin.readTable("all_camp_details", "feedback2021")
+        print(self.data)
+        print(self.data2)
+
+        # if data is there in table then
+        if len(self.data) != 0:
+            # set the data  (basic details :campdet2021 table)
+            half = len(self.data) // 2
+            print("in1")
+            for i in range(half):
+                for j in range(len(self.data[i])):
+                    self.tmp_label = QLabel()
+                    self.tmp_label.setText(str(self.data[i][j]))
+                    self.tmp_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+                    self.tmp_label.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                    self.demand_feedback_win.gridLayout.addWidget(self.tmp_label, i + 1, j)
+            print("process half")
+            for i in range(half, len(self.data)):
+                for j in range(len(self.data[i])):
+                    self.tmp_label = QLabel()
+                    self.tmp_label.setText(str(self.data[i][j]))
+                    self.tmp_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+                    self.tmp_label.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                    self.demand_feedback_win.gridLayout_2.addWidget(self.tmp_label, i-half + 1, j)
+            print("1 done")
+
+        if len(self.data2) != 0:
+            # set the data  (basic details :campdet2021 table)
+            half = len(self.data2) // 2
+            print("in2")
+            for i in range(half):
+                for j in range(len(self.data2[i])):
+                    self.tmp_label = QLabel()
+                    self.tmp_label.setText(str(self.data2[i][j]))
+                    self.tmp_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+                    self.tmp_label.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                    self.demand_feedback_win.gridLayout_3.addWidget(self.tmp_label, i + 1, j)
+            print("Process")
+            for i in range(half, len(self.data2)):
+                for j in range(len(self.data2[i])):
+                    self.tmp_label = QLabel()
+                    self.tmp_label.setText(str(self.data2[i][j]))
+                    self.tmp_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+                    self.tmp_label.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                    self.demand_feedback_win.gridLayout_4.addWidget(self.tmp_label, i - half + 1, j)
+            print("2 done")
+
+        if len(self.data) != 0 or len(self.data2) != 0:
+            self.demand_feedback_win.show()
+        else:
+            QMessageBox.critical(self, "Empty", "No data sets found")
+
 
     def exit_now(self):
         print("Exit signal received")
