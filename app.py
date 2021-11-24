@@ -14,6 +14,7 @@ class CampAdminWindow(QMainWindow, CampAdmin_UI.Ui_camp_admin):
     def __init__(self, camp_name):
         super(CampAdminWindow, self).__init__()
         self.setupUi(self)
+        self.setWindowTitle("Camp Administrator")
 
         # disable all input boxes (default)
         self.lineEdit_family_id.setEnabled(False)
@@ -96,6 +97,9 @@ class CampAdminWindow(QMainWindow, CampAdmin_UI.Ui_camp_admin):
 
         # exit
         self.pushButton_exit.clicked.connect(self.exit_now)
+        self.actionExit.triggered.connect(self.exit_now)
+        self.actionLogout.triggered.connect(self.exit_now)
+
 
         # about
         self.actionAbout.triggered.connect(self.about)
@@ -656,17 +660,18 @@ class SysAdminWindow(QMainWindow, SystemAdmin_UI.Ui_MainWindow):
     def __init__(self):
         super(SysAdminWindow, self).__init__()
         self.setupUi(self)
+        self.setWindowTitle("System Administrator")
 
-        self.pushButton.clicked.connect(self.setup_for_create_database)
+        self.pushButton_register_camp.clicked.connect(self.setup_for_create_database)
         self.actionRegister_camp.triggered.connect(self.setup_for_create_database)
-        self.pushButton_2.clicked.connect(self.setup_for_drop_database)
+        self.pushButton_deregister_camp.clicked.connect(self.setup_for_drop_database)
         self.actionUn_Register_camp.triggered.connect(self.setup_for_drop_database)
-        self.pushButton_3.clicked.connect(self.list_all_registered_camps)
+        self.pushButton_list_all_camps.clicked.connect(self.list_all_registered_camps)
         self.actionList_all_camp_details_2.triggered.connect(self.list_all_registered_camps)
-        self.pushButton_4.clicked.connect(self.setup_for_read_database)
+        self.pushButton_read_a_camp.clicked.connect(self.setup_for_read_database)
         self.actionRead_a_camp_2.triggered.connect(self.setup_for_read_database)
 
-        self.pushButton_5.clicked.connect(self.select_one_of_all_tbl)
+        self.pushButton_get_all_camp_details.clicked.connect(self.select_one_of_all_tbl)
         self.actionList_all_camp_details_3.triggered.connect(self.select_one_of_all_tbl)
         print(1)
         self.one_selector = SysAdmin.SelectOneOfAllDetails()
@@ -674,17 +679,17 @@ class SysAdminWindow(QMainWindow, SystemAdmin_UI.Ui_MainWindow):
         self.one_selector.pushButton_basic_details.clicked.connect(self.list_all_basic_details)
         self.one_selector.pushButton_demand_n_feedback.clicked.connect(self.list_all_demand_feedback)
 
-        self.pushButton_6.clicked.connect(self.exit_now)
+        self.pushButton_exit.clicked.connect(self.exit_now)
         self.actionExit.triggered.connect(self.exit_now)
         self.actionLogout.triggered.connect(self.exit_now)
         self.actionAbout.triggered.connect(self.about)
 
         # this is the button below the field asking campName
-        self.pushButton_7.setText("Disabled")
-        self.pushButton_7.setEnabled(False)
-        self.pushButton_7.setAutoDefault(True)
+        self.pushButton_create.setText("Disabled")
+        self.pushButton_create.setEnabled(False)
+        self.pushButton_create.setAutoDefault(True)
         # later functions enable this, then this line is required
-        self.pushButton_7.clicked.connect(self.call_appropriate)
+        self.pushButton_create.clicked.connect(self.call_appropriate)
 
         # if this window is visible that means authentication was done successfully
         self.camp_name = None
@@ -706,22 +711,22 @@ class SysAdminWindow(QMainWindow, SystemAdmin_UI.Ui_MainWindow):
         self.data = None
 
     def call_appropriate(self):
-        txt = self.pushButton_7.text()
+        txt = self.pushButton_create.text()
 
         if txt == "Proceed":
-            tmp_camp = "camp" + self.lineEdit.text()
+            tmp_camp = "camp" + self.lineEdit_camp_id.text()
             # if camp is present, then creation abort
             if self.admin.isPresentCamp(tmp_camp):
-                self.label_6.setText(tmp_camp + " registration failed as the camp already exists")
                 QMessageBox.critical(self, "Error",
                                      tmp_camp + " registration failed as the camp already exists!!\t\t")
+                self.label_5_lower.setText(tmp_camp + " registration failed as the camp already exists")
             elif tmp_camp == '':
                 QMessageBox.critical(self, "Error", "Camp name can't be empty!!\t\t")
             else:
                 self.get_details()
 
         elif txt == "DeRegister":
-            tmp_camp = "camp" + self.lineEdit.text()
+            tmp_camp = "camp" + self.lineEdit_camp_id.text()
             if tmp_camp != '':
                 self.drop_database()
             else:
@@ -729,8 +734,8 @@ class SysAdminWindow(QMainWindow, SystemAdmin_UI.Ui_MainWindow):
         elif txt == "Read":
             self.read_a_database()
 
-        self.pushButton_7.setEnabled(False)
-        self.pushButton_7.setText("Disabled")
+        self.pushButton_create.setEnabled(False)
+        self.pushButton_create.setText("Disabled")
 
     # ----------------------- About -----------------------
     def about(self):
@@ -741,19 +746,19 @@ class SysAdminWindow(QMainWindow, SystemAdmin_UI.Ui_MainWindow):
 
     # ----------------------- For listing all database names (registered camp names) -----------------------
     def list_all_registered_camps(self):
-        self.pushButton_7.setText("Disabled")
-        self.pushButton_7.setEnabled(False)
+        self.pushButton_create.setText("Disabled")
+        self.pushButton_create.setEnabled(False)
         all_databases_list = self.admin.listAllDatabases()[3:]
         # leaving top 3 camps (are of postgres server)
 
         all_databases = "All Camp (Names) currently registered are:\n\n"
         for db in all_databases_list:
             all_databases += db + '\n'
-        self.label_4.setText('')
-        self.label_4.setFont(QtGui.QFont("MS Shell Dlg 2", 12))
-        self.label_4.setText(all_databases)
+        self.label_in_grey_color.setText('')
+        self.label_in_grey_color.setFont(QtGui.QFont("MS Shell Dlg 2", 12))
+        self.label_in_grey_color.setText(all_databases)
         # auto expand (to be used every time new text is set)
-        self.label_4.adjustSize()
+        self.label_in_grey_color.adjustSize()
 
     # ----------------------- For displaying information of a 'specific camp' -----------------------
     def setup_for_read_database(self):
@@ -763,15 +768,15 @@ class SysAdminWindow(QMainWindow, SystemAdmin_UI.Ui_MainWindow):
         self.list_all_registered_camps()
 
         # connect to camp id line
-        self.lineEdit.setFocus()
-        self.lineEdit.clear()
-        self.pushButton_7.setText("Read")
-        self.pushButton_7.setEnabled(True)
+        self.lineEdit_camp_id.setFocus()
+        self.lineEdit_camp_id.clear()
+        self.pushButton_create.setText("Read")
+        self.pushButton_create.setEnabled(True)
 
     def read_a_database(self):
         print("Read a database signal received")
         # extract camp id and make camp_name
-        self.camp_name = "camp" + self.lineEdit.text()
+        self.camp_name = "camp" + self.lineEdit_camp_id.text()
 
         # restructure
         self.data = self.admin.readCamp(self.camp_name)
@@ -780,10 +785,10 @@ class SysAdminWindow(QMainWindow, SystemAdmin_UI.Ui_MainWindow):
         if self.data[0] == '-1':
             QMessageBox.critical(self, "Invalid", self.camp_name + " is not a registered camp!!\t")
         else:
-            self.label_4.setText('')
-            self.label_4.setFont(QtGui.QFont("MS Shell Dlg 2", 12))
-            self.label_4.setText(self.data[0])
-            self.label_4.adjustSize()
+            self.label_in_grey_color.setText('')
+            self.label_in_grey_color.setFont(QtGui.QFont("MS Shell Dlg 2", 12))
+            self.label_in_grey_color.setText(self.data[0])
+            self.label_in_grey_color.adjustSize()
             self.select_table = SysAdmin.SelectATable()
             if 'main_table2021' not in self.data[1]:
                 # disable main_table button
@@ -960,40 +965,40 @@ class SysAdminWindow(QMainWindow, SystemAdmin_UI.Ui_MainWindow):
         print("Drop database signal received")
         print("before focus")
 
-        self.lineEdit.setFocus()
-        self.lineEdit.clear()
-        self.pushButton_7.setText("DeRegister")
-        self.pushButton_7.setEnabled(True)
+        self.lineEdit_camp_id.setFocus()
+        self.lineEdit_camp_id.clear()
+        self.pushButton_create.setText("DeRegister")
+        self.pushButton_create.setEnabled(True)
 
     def drop_database(self):
         print("Drop database signal2 received")
 
-        self.camp_name = "camp" + self.lineEdit.text()
+        self.camp_name = "camp" + self.lineEdit_camp_id.text()
         self.data = self.admin.deRegister_step1(self.camp_name)
         print(self.data)
         if self.data == -1:
             QMessageBox.critical(self, "Invalid", "Error!! No such camp exists!!\t")
-            self.label_6.setText(self.camp_name + " camp does not exists!!")
+            self.label_5_lower.setText(self.camp_name + " camp does not exists!!")
         else:
             self.response = QMessageBox.question(self, "Are You Sure", self.data)
 
             if self.response == QMessageBox.Yes:
                 self.admin.deRegister_step2(self.camp_name)
                 QMessageBox.information(self, "Information", self.camp_name + " de-registered successfully.")
-                self.label_6.setText(self.camp_name + " successfully de-registered.")
+                self.label_5_lower.setText(self.camp_name + " successfully de-registered.")
             elif self.response == QMessageBox.No:
                 QMessageBox.information(self, "Abort", self.camp_name + " de-registration aborted!!")
-                self.label_6.setText(self.camp_name + " de-registration Abort!!")
+                self.label_5_lower.setText(self.camp_name + " de-registration Abort!!")
 
     # ----------------------- For registering camp -----------------------
     def setup_for_create_database(self):
         print("Create database signal received")
         print("before focus")
 
-        self.lineEdit.setFocus()
-        self.lineEdit.clear()
-        self.pushButton_7.setText("Proceed")
-        self.pushButton_7.setEnabled(True)
+        self.lineEdit_camp_id.setFocus()
+        self.lineEdit_camp_id.clear()
+        self.pushButton_create.setText("Proceed")
+        self.pushButton_create.setEnabled(True)
 
     def get_details(self):
         self.createDbase_step1.show()
@@ -1042,14 +1047,14 @@ class SysAdminWindow(QMainWindow, SystemAdmin_UI.Ui_MainWindow):
         self.createDbase_step1.close()
         self.createDbase_step2.close()
 
-        self.camp_name = "camp" + self.lineEdit.text()
+        self.camp_name = "camp" + self.lineEdit_camp_id.text()
         self.response = self.admin.registerCamp(self.camp_name, self.camp_data, self.members_data)
         if self.response == 0:
-            self.label_6.setText(self.camp_name + " successfully registered.")
             QMessageBox.information(self, "Information", self.camp_name + " registered successfully.")
+            self.label_5_lower.setText(self.camp_name + " successfully registered.")
         else:
-            self.label_6.setText(self.camp_name + " registration failed as the camp already exists")
             QMessageBox.critical(self, "Error", self.camp_name + " registration failed as the camp already exists!!\t\t")
+            self.label_5_lower.setText(self.camp_name + " registration failed as the camp already exists")
 
         # enable the main window of System Administrator
         self.setEnabled(True)
@@ -1069,8 +1074,8 @@ class SysAdminWindow(QMainWindow, SystemAdmin_UI.Ui_MainWindow):
         self.one_selector.show()
 
     def list_all_basic_details(self):
-        self.pushButton_7.setText("Disabled")
-        self.pushButton_7.setEnabled(False)
+        self.pushButton_create.setText("Disabled")
+        self.pushButton_create.setEnabled(False)
 
         print("List all camps and their details signal received")
         self.camp_det_win = SysAdmin.CampDetSupportMem()
@@ -1120,8 +1125,8 @@ class SysAdminWindow(QMainWindow, SystemAdmin_UI.Ui_MainWindow):
             QMessageBox.critical(self, "Empty", "The table is empty!!\t")
 
     def list_all_demand_feedback(self):
-        self.pushButton_7.setText("Disabled")
-        self.pushButton_7.setEnabled(False)
+        self.pushButton_create.setText("Disabled")
+        self.pushButton_create.setEnabled(False)
 
         print("List all camps and their details signal received")
         self.demand_feedback_win = SysAdmin.DemandFeedback()
@@ -1192,6 +1197,7 @@ class Portal(QMainWindow, Portal_UI.Ui_mainWindow):
     def __init__(self):
         super(Portal, self).__init__()
         self.setupUi(self)
+        self.setWindowTitle("Portal Selector")
 
         # connect button is disabled [will enable when a valid role/portal is selected]
         self.pushButton.setEnabled(False)

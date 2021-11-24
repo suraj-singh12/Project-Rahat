@@ -34,7 +34,7 @@
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
-        <widget class="QPushButton" name="pushButton">
+        <widget class="QPushButton" name="pushButton_register_camp">
          <property name="minimumSize">
           <size>
            <width>250</width>
@@ -470,7 +470,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton_2">
+        <widget class="QPushButton" name="pushButton_deregister_camp">
          <property name="minimumSize">
           <size>
            <width>250</width>
@@ -906,7 +906,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton_3">
+        <widget class="QPushButton" name="pushButton_list_all_camps">
          <property name="minimumSize">
           <size>
            <width>250</width>
@@ -1342,7 +1342,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton_4">
+        <widget class="QPushButton" name="pushButton_read_a_camp">
          <property name="minimumSize">
           <size>
            <width>350</width>
@@ -1778,7 +1778,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton_5">
+        <widget class="QPushButton" name="pushButton_get_all_camp_details">
          <property name="minimumSize">
           <size>
            <width>350</width>
@@ -2214,7 +2214,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton_6">
+        <widget class="QPushButton" name="pushButton_exit">
          <property name="minimumSize">
           <size>
            <width>150</width>
@@ -2669,7 +2669,7 @@
         <number>50</number>
        </property>
        <item>
-        <widget class="QLabel" name="label_2">
+        <widget class="QLabel" name="label_camp_id">
          <property name="font">
           <font>
            <pointsize>10</pointsize>
@@ -2681,7 +2681,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="lineEdit">
+        <widget class="QLineEdit" name="lineEdit_camp_id">
          <property name="minimumSize">
           <size>
            <width>0</width>
@@ -2702,7 +2702,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton_7">
+        <widget class="QPushButton" name="pushButton_create">
          <property name="minimumSize">
           <size>
            <width>0</width>
@@ -3145,7 +3145,7 @@
     <property name="autoFillBackground">
      <bool>true</bool>
     </property>
-    <widget class="QLabel" name="label_4">
+    <widget class="QLabel" name="label_in_grey_color">
      <property name="geometry">
       <rect>
        <x>20</x>
@@ -3577,7 +3577,7 @@
      </property>
     </widget>
    </widget>
-   <widget class="QLabel" name="label_5">
+   <widget class="QLabel" name="label_5_upper">
     <property name="geometry">
      <rect>
       <x>380</x>
@@ -3590,7 +3590,7 @@
      <string/>
     </property>
    </widget>
-   <widget class="QLabel" name="label_6">
+   <widget class="QLabel" name="label_5_lower">
     <property name="geometry">
      <rect>
       <x>370</x>
