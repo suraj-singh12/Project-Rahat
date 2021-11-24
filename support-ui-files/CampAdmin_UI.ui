@@ -5099,6 +5099,8 @@
     <addaction name="actionFind_Resource"/>
     <addaction name="actionRequest_Supply_Data"/>
     <addaction name="actionFind_Vacancies_in_other_camps"/>
+    <addaction name="actionLogout"/>
+    <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuFind">
     <property name="title">
@@ -5173,6 +5175,16 @@
   <action name="actionAbout">
    <property name="text">
     <string>About</string>
+   </property>
+  </action>
+  <action name="actionLogout">
+   <property name="text">
+    <string>Logout</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
    </property>
   </action>
  </widget>

@@ -20,6 +20,7 @@ class DemandFeedback(QtWidgets.QMainWindow, Demand_Feedback_UI.Ui_MainWindow):
     def __init__(self):
         super(DemandFeedback, self).__init__()
         self.setupUi(self)
+        self.setWindowTitle("Demand & Feedback")
         self.pushButton_ok.setAutoDefault(True)
         self.pushButton_ok.clicked.connect(self.ok_clicked)
 
@@ -27,10 +28,12 @@ class DemandFeedback(QtWidgets.QMainWindow, Demand_Feedback_UI.Ui_MainWindow):
         # close the window
         self.close()
 
+
 class CampDetSupportMem(QtWidgets.QMainWindow, CampDet_SupportMember_UI.Ui_MainWindow):
     def __init__(self):
         super(CampDetSupportMem, self).__init__()
         self.setupUi(self)
+        self.setWindowTitle("Basic Camp Details")
         self.setWindowTitle("Details")
         self.pushButton_ok.clicked.connect(self.ok_clicked)
 
@@ -43,23 +46,25 @@ class SelectOneOfAllDetails(QtWidgets.QWidget, all_camp_det_selector.Ui_Dialog):
     def __init__(self):
         super(SelectOneOfAllDetails, self).__init__()
         self.setupUi(self)
+        self.setWindowTitle("Selector")
         self.pushButton_basic_details.setAutoDefault(True)
         self.pushButton_demand_n_feedback.setAutoDefault(True)
 
         self.pushButton_basic_details.setFocus()
-        self.setWindowTitle("Selector")
 
 
 class SelectATable(QtWidgets.QWidget, SelectTableToRead_UI.Ui_Dialog):
     def __init__(self):
         super(SelectATable, self).__init__()
         self.setupUi(self)
+        self.setWindowTitle("Select A Table")
 
 
 class MainTable(QtWidgets.QMainWindow, MainTable2021_UI.Ui_MainWindow):
     def __init__(self):
         super(MainTable, self).__init__()
         self.setupUi(self)
+        self.setWindowTitle("Basic Details")
         self.pushButton.setAutoDefault(True)
         self.pushButton.clicked.connect(self.ok_clicked)
 
@@ -72,6 +77,7 @@ class InjuryTable(QtWidgets.QMainWindow, InjuryTable2021_UI.Ui_MainWindow):
     def __init__(self):
         super(InjuryTable, self).__init__()
         self.setupUi(self)
+        self.setWindowTitle("Injury Details")
         self.pushButton.setAutoDefault(True)
         self.pushButton.clicked.connect(self.ok_clicked)
 
@@ -84,6 +90,7 @@ class RegularSupply(QtWidgets.QMainWindow, RegularSupplyTable_UI.Ui_MainWindow):
     def __init__(self):
         super(RegularSupply, self).__init__()
         self.setupUi(self)
+        self.setWindowTitle("Regular Supply")
         self.pushButton.setAutoDefault(True)
         self.pushButton.clicked.connect(self.ok_clicked)
 
@@ -96,6 +103,7 @@ class MedicalSupply(QtWidgets.QMainWindow, MedicalSupplyTable_UI.Ui_MainWindow):
     def __init__(self):
         super(MedicalSupply, self).__init__()
         self.setupUi(self)
+        self.setWindowTitle("Medical Supply")
         self.pushButton.setAutoDefault(True)
         self.pushButton.clicked.connect(self.ok_clicked)
 
@@ -108,6 +116,7 @@ class TodayAll(QtWidgets.QMainWindow, TodayAll_UI.Ui_MainWindow):
     def __init__(self):
         super(TodayAll, self).__init__()
         self.setupUi(self)
+        self.setWindowTitle("Today All Entries")
         self.pushButton.setAutoDefault(True)
         self.pushButton.clicked.connect(self.ok_clicked)
 
@@ -120,6 +129,7 @@ class MyCamp(QtWidgets.QMainWindow, MyCampInfo_UI.Ui_MainWindow):
     def __init__(self):
         super(MyCamp, self).__init__()
         self.setupUi(self)
+        self.setWindowTitle("My Camp Details")
         self.pushButton.setAutoDefault(True)
         self.pushButton.clicked.connect(self.ok_clicked)
 
@@ -132,6 +142,7 @@ class AllCampDet(QtWidgets.QMainWindow, AllCampDetails_UI.Ui_MainWindow):
     def __init__(self):
         super(AllCampDet, self).__init__()
         self.setupUi(self)
+        self.setWindowTitle("All Camp Details")
         self.pushButton.setAutoDefault(True)
         self.pushButton.clicked.connect(self.ok_clicked)
 
@@ -144,6 +155,7 @@ class GetDetails(QtWidgets.QWidget, GetCampDetails_UI.Ui_Dialog):
     def __init__(self):
         super(GetDetails, self).__init__()
         self.setupUi(self)
+        self.setWindowTitle("Details")
         self.pushButton.setAutoDefault(True)
         self.pushButton_2.setAutoDefault(True)
 
@@ -152,6 +164,8 @@ class GetMemDetails(QtWidgets.QWidget, GetMemberDetails_UI.Ui_Dialog):
     def __init__(self):
         super(GetMemDetails, self).__init__()
         self.setupUi(self)
+        self.setWindowTitle("Member Details")
+
         self.pushButton.setAutoDefault(True)
         self.pushButton_2.setAutoDefault(True)
 

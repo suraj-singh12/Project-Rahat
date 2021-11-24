@@ -19,6 +19,7 @@ class NewPerson(QtWidgets.QWidget, NewPersonForm_UI.Ui_Dialog):
     def __init__(self):
         super(NewPerson, self).__init__()
         self.setupUi(self)
+        self.setWindowTitle("New Person")
         # disable injury subform (input fields)
         self.lineEdit_7.setEnabled(False)
         self.comboBox.setEnabled(False)
@@ -36,6 +37,7 @@ class RequestSupply(QtWidgets.QWidget, RequestSupply_UI.Ui_RequestSupplyPopup):
     def __init__(self):
         super(RequestSupply, self).__init__()
         self.setupUi(self)
+        self.setWindowTitle("Request Supply")
         # self.submit_pushButton.setFocus()
         self.pushButton_submit.setAutoDefault(True)
         self.pushButton_reset.setAutoDefault(True)
@@ -52,6 +54,7 @@ class VacanciesInCamp(QtWidgets.QWidget, VacanciesInCamps_UI.Ui_Dialog):
     def __init__(self):
         super(VacanciesInCamp, self).__init__()
         self.setupUi(self)
+        self.setWindowTitle("Vacancies In Camp")
         self.pushButton_ok.setFocus()
         self.pushButton_ok.setAutoDefault(True)
         self.pushButton_ok.clicked.connect(self.ok_pressed)
@@ -65,6 +68,7 @@ class UpdateSupply(QtWidgets.QWidget, UpdateSupplyData_UI.Ui_UpdateSupplyDataPop
     def __init__(self):
         super(UpdateSupply, self).__init__()
         self.setupUi(self)
+        self.setWindowTitle("Update Supply")
         self.lineEdit_item_name.setFocus()
         self.pushButton_reset.setAutoDefault(True)
         self.pushButton_submit.setAutoDefault(True)
@@ -104,18 +108,21 @@ class UpdatePerson(QtWidgets.QWidget, UpdateDetailsPerson_UI.Ui_Dialog):
     def __init__(self):
         super(UpdatePerson, self).__init__()
         self.setupUi(self)
+        self.setWindowTitle("Update Person Details")
 
 
 class ResourceType(QtWidgets.QWidget, WhichResource_UI.Ui_Dialog):
     def __init__(self):
         super(ResourceType, self).__init__()
         self.setupUi(self)
+        self.setWindowTitle("Resource Type Selector")
 
 
 class MedicalResource(QtWidgets.QWidget, MedicalResourceAvailibility_UI.Ui_Dialog):
     def __init__(self):
         super(MedicalResource, self).__init__()
         self.setupUi(self)
+        self.setWindowTitle("Medical Resources")
         self.pushButton.setFocus()
         self.pushButton.setAutoDefault(True)
         self.pushButton.clicked.connect(self.ok_clicked)
@@ -129,6 +136,7 @@ class RegularResource(QtWidgets.QWidget, RegularResourceAvailibility_UI.Ui_Dialo
     def __init__(self):
         super(RegularResource, self).__init__()
         self.setupUi(self)
+        self.setWindowTitle("Regular Resources")
         self.pushButton.setFocus()
         self.pushButton.setAutoDefault(True)
         self.pushButton.clicked.connect(self.ok_clicked)
@@ -142,12 +150,14 @@ class SelectATable(QtWidgets.QWidget, SelectTableToRead_UI.Ui_Dialog):
     def __init__(self):
         super(SelectATable, self).__init__()
         self.setupUi(self)
+        self.setWindowTitle("Selector")
 
 
 class MainTable(QtWidgets.QMainWindow, MainTable2021_UI.Ui_MainWindow):
     def __init__(self):
         super(MainTable, self).__init__()
         self.setupUi(self)
+        self.setWindowTitle("Main Table")
         self.pushButton.setAutoDefault(True)
         self.pushButton.clicked.connect(self.ok_clicked)
 
