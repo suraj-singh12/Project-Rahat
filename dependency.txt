@@ -1,2 +1,3 @@
 postgre sql
 psycopg2
+pyqt5
