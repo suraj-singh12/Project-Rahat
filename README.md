@@ -17,29 +17,39 @@ This software has been developed using PostgreSQL, Python, PyCharm, and PyQt5 fr
 
 ![Screenshot (409)](https://user-images.githubusercontent.com/71935307/143688433-4de187e1-5a5e-461e-ab86-159780f30dfc.png)
 
-# PreRequisites
+## PreRequisites
 
-## SQL
+### SQL
 - PostgreSQL
 
-## Pip packages
+### Pip packages
   ```bash
   pip install psycopg2
   ```
   ```bash
   pip install pyqt5
   ```
+### Setting up the configuration files
+1. Go inside `sample-config-ini-files/` directory
+2. Fill your choice passwords in file: `sample-password.ini`
+3. Fill the password of your PostgreSQL in file: `sample-database.ini`
 
-# Setting up the BASE
+    > (this password is the one you use to run your PostgreSQL)
+
+4. Rename `sample-database.ini` to `database.ini`
+5. Rename `sample-passwords.ini` to `passwords.ini`
+
+6. Move both of the renamed `.ini` files to outer folder, i.e. in `Project-Rahat/` directory
+
+### Setting up the BASE
 Run the `createTestBase.py` 
 
 Click all three buttons one by one and ensure successfully base creation.
 
-# Running the software
+## Running the software
 Run the `app.py` file.
 
-# Live Demonstration of running system
+## Live Demonstration of running system
 
 
 https://user-images.githubusercontent.com/71935307/143682117-ab61ee51-c4e8-4000-80ec-4e414417ba03.mp4
-
